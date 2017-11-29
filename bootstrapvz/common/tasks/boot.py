@@ -21,7 +21,8 @@ class BlackListModules(Task):
 
     @classmethod
     def run(cls, info):
-        blacklist_path = os.path.join(info.root, 'etc/modprobe.d/blacklist.conf')
+        blacklist_path = os.path.join(info.root,
+                                      'etc/modprobe.d/blacklist.conf')
         with open(blacklist_path, 'a') as blacklist:
             blacklist.write(('# disable pc speaker and floppy\n'
                              'blacklist pcspkr\n'
@@ -48,5 +49,6 @@ class DisableGetTTYs(Task):
         else:
             from shutil import copy
             logind_asset_path = os.path.join(assets, 'systemd/logind.conf')
-            logind_destination = os.path.join(info.root, 'etc/systemd/logind.conf')
+            logind_destination = os.path.join(info.root,
+                                              'etc/systemd/logind.conf')
             copy(logind_asset_path, logind_destination)

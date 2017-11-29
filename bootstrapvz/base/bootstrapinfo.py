@@ -1,11 +1,10 @@
-
-
 class BootstrapInformation(object):
     """The BootstrapInformation class holds all information about the bootstrapping process.
     The nature of the attributes of this class are rather diverse.
     Tasks may set their own attributes on this class for later retrieval by another task.
     Information that becomes invalid (e.g. a path to a file that has been deleted) must be removed.
     """
+
     def __init__(self, manifest=None, debug=False):
         """Instantiates a new bootstrap info object.
 
@@ -18,21 +17,27 @@ class BootstrapInformation(object):
 
         # Create a run_id. This id may be used to uniquely identify the currrent bootstrapping process
         import random
-        self.run_id = '{id:08x}'.format(id=random.randrange(16 ** 8))
+        self.run_id = '{id:08x}'.format(id=random.randrange(16**8))
 
         # Define the path to our workspace
         import os.path
-        self.workspace = os.path.join(manifest.bootstrapper['workspace'], self.run_id)
+        self.workspace = os.path.join(manifest.bootstrapper['workspace'],
+                                      self.run_id)
 
         # Load all the volume information
         from fs import load_volume
-        self.volume = load_volume(self.manifest.volume, manifest.system['bootloader'])
+        self.volume = load_volume(self.manifest.volume,
+                                  manifest.system['bootloader'])
 
         # The default apt mirror
-        self.apt_mirror = self.manifest.packages.get('mirror', 'http://deb.debian.org/debian/')
+        self.apt_mirror = self.manifest.packages.get(
+            'mirror', 'http://deb.debian.org/debian/')
 
         # Create the manifest_vars dictionary
-        self.manifest_vars = self.__create_manifest_vars(self.manifest, {'apt_mirror': self.apt_mirror})
+        self.manifest_vars = self.__create_manifest_vars(
+            self.manifest, {
+                'apt_mirror': self.apt_mirror
+            })
 
         # Keep a list of apt sources,
         # so that tasks may add to that list without having to fiddle with apt source list files.
@@ -104,9 +109,11 @@ class BootstrapInformation(object):
         # and map the datetime variables directly to the dictionary
         from datetime import datetime
         now = datetime.now()
-        time_vars = ['%a', '%A', '%b', '%B', '%c', '%d', '%f', '%H',
-                     '%I', '%j', '%m', '%M', '%p', '%S', '%U', '%w',
-                     '%W', '%x', '%X', '%y', '%Y', '%z', '%Z']
+        time_vars = [
+            '%a', '%A', '%b', '%B', '%c', '%d', '%f', '%H', '%I', '%j', '%m',
+            '%M', '%p', '%S', '%U', '%w', '%W', '%x', '%X', '%y', '%Y', '%z',
+            '%Z'
+        ]
         for key in time_vars:
             manifest_vars[key] = now.strftime(key)
 
@@ -121,14 +128,19 @@ class BootstrapInformation(object):
         def can_serialize(obj):
             if hasattr(obj, '__class__') and hasattr(obj, '__module__'):
                 class_name = obj.__module__ + '.' + obj.__class__.__name__
-                return class_name in supported_classes or isinstance(obj, (BaseException, Exception))
+                return class_name in supported_classes or isinstance(
+                    obj, (BaseException, Exception))
             return True
 
         def filter_state(state):
             if isinstance(state, dict):
-                return {key: filter_state(val) for key, val in state.items() if can_serialize(val)}
+                return {
+                    key: filter_state(val)
+                    for key, val in state.items() if can_serialize(val)
+                }
             if isinstance(state, (set, tuple, list, frozenset)):
-                return type(state)(filter_state(val) for val in state if can_serialize(val))
+                return type(state)(
+                    filter_state(val) for val in state if can_serialize(val))
             return state
 
         state = filter_state(self.__dict__)
@@ -143,6 +155,7 @@ class BootstrapInformation(object):
 class DictClass(dict):
     """Tiny extension of dict to allow setting and getting keys via attributes
     """
+
     def __getattr__(self, name):
         return self[name]
 

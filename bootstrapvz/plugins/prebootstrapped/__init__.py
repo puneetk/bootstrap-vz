@@ -19,28 +19,27 @@ def validate_manifest(data, validator, error):
 
 def resolve_tasks(taskset, manifest):
     settings = manifest.plugins['prebootstrapped']
-    skip_tasks = [ebs.Create,
-                  loopback.Create,
-                  folder.Create,
-
-                  filesystem.Format,
-                  partitioning.PartitionVolume,
-                  filesystem.TuneVolumeFS,
-                  filesystem.AddXFSProgs,
-                  filesystem.CreateBootMountDir,
-
-                  apt.DisableDaemonAutostart,
-                  dpkg.InitializeBootstrapFilterList,
-                  dpkg.CreateDpkgCfg,
-                  dpkg.CreateBootstrapFilterScripts,
-                  dpkg.FilterLocales,
-                  dpkg.ExcludeDocs,
-                  dpkg.DeleteBootstrapFilterScripts,
-                  locale.GenerateLocale,
-                  bootstrap.MakeTarball,
-                  bootstrap.Bootstrap,
-                  guest_additions.InstallGuestAdditions,
-                  ]
+    skip_tasks = [
+        ebs.Create,
+        loopback.Create,
+        folder.Create,
+        filesystem.Format,
+        partitioning.PartitionVolume,
+        filesystem.TuneVolumeFS,
+        filesystem.AddXFSProgs,
+        filesystem.CreateBootMountDir,
+        apt.DisableDaemonAutostart,
+        dpkg.InitializeBootstrapFilterList,
+        dpkg.CreateDpkgCfg,
+        dpkg.CreateBootstrapFilterScripts,
+        dpkg.FilterLocales,
+        dpkg.ExcludeDocs,
+        dpkg.DeleteBootstrapFilterScripts,
+        locale.GenerateLocale,
+        bootstrap.MakeTarball,
+        bootstrap.Bootstrap,
+        guest_additions.InstallGuestAdditions,
+    ]
     if manifest.volume['backing'] == 'ebs':
         if settings.get('snapshot', None) is not None:
             taskset.add(tasks.CreateFromSnapshot)

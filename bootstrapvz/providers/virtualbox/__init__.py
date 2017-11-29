@@ -13,19 +13,21 @@ def validate_manifest(data, validator, error):
 def resolve_tasks(taskset, manifest):
     taskset.update(task_groups.get_standard_groups(manifest))
 
-    taskset.update([tasks.packages.DefaultPackages,
-                    tasks.boot.AddVirtualConsoleGrubOutputDevice,
-                    loopback.AddRequiredCommands,
-                    loopback.Create,
-                    image.MoveImage,
-                    ])
+    taskset.update([
+        tasks.packages.DefaultPackages,
+        tasks.boot.AddVirtualConsoleGrubOutputDevice,
+        loopback.AddRequiredCommands,
+        loopback.Create,
+        image.MoveImage,
+    ])
 
     if manifest.provider.get('guest_additions', False):
         from tasks import guest_additions
-        taskset.update([guest_additions.CheckGuestAdditionsPath,
-                        guest_additions.AddGuestAdditionsPackages,
-                        guest_additions.InstallGuestAdditions,
-                        ])
+        taskset.update([
+            guest_additions.CheckGuestAdditionsPath,
+            guest_additions.AddGuestAdditionsPackages,
+            guest_additions.InstallGuestAdditions,
+        ])
 
 
 def resolve_rollback_tasks(taskset, manifest, completed, counter_task):

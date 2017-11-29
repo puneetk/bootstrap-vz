@@ -49,14 +49,17 @@ class GetCredentials(Task):
 
         import boto.provider
         provider = boto.provider.Provider('aws')
-        if all(getattr(provider, provider_key(key)) is not None for key in keys):
+        if all(
+                getattr(provider, provider_key(key)) is not None
+                for key in keys):
             for key in keys:
                 creds[key] = getattr(provider, provider_key(key))
             if hasattr(provider, 'security_token'):
                 creds['security-token'] = provider.security_token
             return creds
-        raise RuntimeError(('No ec2 credentials found, they must all be specified '
-                            'exclusively via environment variables or through the manifest.'))
+        raise RuntimeError(
+            ('No ec2 credentials found, they must all be specified '
+             'exclusively via environment variables or through the manifest.'))
 
 
 class Connect(Task):
@@ -78,4 +81,5 @@ class Connect(Task):
         info._ec2['connection'] = boto3.Session(info._ec2['region'],
                                                 info.credentials['access-key'],
                                                 info.credentials['secret-key'])
-        info._ec2['connection'] = boto3.client('ec2', region_name=info._ec2['region'])
+        info._ec2['connection'] = boto3.client(
+            'ec2', region_name=info._ec2['region'])

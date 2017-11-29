@@ -4,7 +4,6 @@ import os
 
 
 class LogicalVolume(Volume):
-
     def __init__(self, partitionmap):
         super(LogicalVolume, self).__init__(partitionmap)
         self.vg = ''
@@ -19,12 +18,15 @@ class LogicalVolume(Volume):
     def _before_create(self, e):
         self.image_path = e.image_path
         lv_size = str(self.size.bytes.get_qty_in('MiB'))
-        log_check_call(['lvcreate', '--size', '{mib}M'.format(mib=lv_size),
-                        '--name', self.lv, self.vg])
+        log_check_call([
+            'lvcreate', '--size', '{mib}M'.format(mib=lv_size), '--name',
+            self.lv, self.vg
+        ])
 
     def _before_attach(self, e):
         log_check_call(['lvchange', '--activate', 'y', self.image_path])
-        [self.loop_device_path] = log_check_call(['losetup', '--show', '--find', '--partscan', self.image_path])
+        [self.loop_device_path] = log_check_call(
+            ['losetup', '--show', '--find', '--partscan', self.image_path])
         self.device_path = self.loop_device_path
 
     def _before_detach(self, e):

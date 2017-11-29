@@ -21,12 +21,14 @@ class CheckPublicKeyFile(Task):
             abs_pubkey = rel_path(info.manifest.path, pubkey)
             if not os.path.isfile(abs_pubkey):
                 msg = 'Could not find public key at %s' % pubkey
-                info.manifest.validation_error(msg, ['plugins', 'admin_user', 'pubkey'])
+                info.manifest.validation_error(
+                    msg, ['plugins', 'admin_user', 'pubkey'])
 
             ret, _, stderr = log_call(['ssh-keygen', '-l', '-f', abs_pubkey])
             if ret != 0:
                 msg = 'Invalid public key file at %s' % pubkey
-                info.manifest.validation_error(msg, ['plugins', 'admin_user', 'pubkey'])
+                info.manifest.validation_error(
+                    msg, ['plugins', 'admin_user', 'pubkey'])
 
 
 class AddSudoPackage(Task):
@@ -45,10 +47,10 @@ class CreateAdminUser(Task):
     @classmethod
     def run(cls, info):
         from bootstrapvz.common.tools import log_check_call
-        log_check_call(['chroot', info.root,
-                        'useradd',
-                        '--create-home', '--shell', '/bin/bash',
-                        info.manifest.plugins['admin_user']['username']])
+        log_check_call([
+            'chroot', info.root, 'useradd', '--create-home', '--shell',
+            '/bin/bash', info.manifest.plugins['admin_user']['username']
+        ])
 
 
 class PasswordlessSudo(Task):
@@ -60,7 +62,8 @@ class PasswordlessSudo(Task):
         sudo_admin_path = os.path.join(info.root, 'etc/sudoers.d/99_admin')
         username = info.manifest.plugins['admin_user']['username']
         with open(sudo_admin_path, 'w') as sudo_admin:
-            sudo_admin.write('{username} ALL=(ALL) NOPASSWD:ALL'.format(username=username))
+            sudo_admin.write(
+                '{username} ALL=(ALL) NOPASSWD:ALL'.format(username=username))
         import stat
         ug_read_only = (stat.S_IRUSR | stat.S_IRGRP)
         os.chmod(sudo_admin_path, ug_read_only)
@@ -75,8 +78,8 @@ class AdminUserPassword(Task):
     def run(cls, info):
         from bootstrapvz.common.tools import log_check_call
         log_check_call(['chroot', info.root, 'chpasswd'],
-                       info.manifest.plugins['admin_user']['username'] +
-                       ':' + info.manifest.plugins['admin_user']['password'])
+                       info.manifest.plugins['admin_user']['username'] + ':' +
+                       info.manifest.plugins['admin_user']['password'])
 
 
 class AdminUserPublicKey(Task):
@@ -88,9 +91,11 @@ class AdminUserPublicKey(Task):
     @classmethod
     def run(cls, info):
         if 'ec2-get-credentials' in info.initd['install']:
-            log.warn('You are using a static public key for the admin account.'
-                     'This will conflict with the ec2 public key injection mechanism.'
-                     'The ec2-get-credentials startup script will therefore not be enabled.')
+            log.warn(
+                'You are using a static public key for the admin account.'
+                'This will conflict with the ec2 public key injection mechanism.'
+                'The ec2-get-credentials startup script will therefore not be enabled.'
+            )
             del info.initd['install']['ec2-get-credentials']
 
         # Get the stuff we need (username & public key)
@@ -105,9 +110,9 @@ class AdminUserPublicKey(Task):
 
         # paths
         from os.path import join
-        ssh_dir_rel   = join('home', username, '.ssh')
+        ssh_dir_rel = join('home', username, '.ssh')
         auth_keys_rel = join(ssh_dir_rel, 'authorized_keys')
-        ssh_dir_abs   = join(info.root, ssh_dir_rel)
+        ssh_dir_abs = join(info.root, ssh_dir_rel)
         auth_keys_abs = join(info.root, auth_keys_rel)
 
         # Create the ssh dir if nobody has created it yet
@@ -123,8 +128,10 @@ class AdminUserPublicKey(Task):
         # Set the owner of the authorized keys file
         # (must be through chroot, the host system doesn't know about the user)
         from bootstrapvz.common.tools import log_check_call
-        log_check_call(['chroot', info.root,
-                        'chown', '-R', (username + ':' + username), ssh_dir_rel])
+        log_check_call([
+            'chroot', info.root, 'chown', '-R', (username + ':' + username),
+            ssh_dir_rel
+        ])
 
 
 class AdminUserPublicKeyEC2(Task):
@@ -135,6 +142,10 @@ class AdminUserPublicKeyEC2(Task):
     @classmethod
     def run(cls, info):
         from bootstrapvz.common.tools import sed_i
-        getcreds_path = os.path.join(info.root, 'etc/init.d/ec2-get-credentials')
+        getcreds_path = os.path.join(info.root,
+                                     'etc/init.d/ec2-get-credentials')
         username = info.manifest.plugins['admin_user']['username']
-        sed_i(getcreds_path, "username='root'", "username='{username}'".format(username=username))
+        sed_i(
+            getcreds_path,
+            "username='root'",
+            "username='{username}'".format(username=username))

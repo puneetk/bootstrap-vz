@@ -13,7 +13,8 @@ class AddRequiredCommands(Task):
 
     @classmethod
     def run(cls, info):
-        if 'xfs' in (p.filesystem for p in info.volume.partition_map.partitions):
+        if 'xfs' in (p.filesystem
+                     for p in info.volume.partition_map.partitions):
             info.host_dependencies['mkfs.xfs'] = 'xfsprogs'
 
 
@@ -111,8 +112,9 @@ class MountAdditional(Task):
         from bootstrapvz.base.fs.partitions.single import SinglePartition
 
         def is_additional(partition):
-            return (not isinstance(partition, (UnformattedPartition, SinglePartition)) and
-                    partition.name not in ["boot", "swap", "root"])
+            return (not isinstance(partition,
+                                   (UnformattedPartition, SinglePartition))
+                    and partition.name not in ["boot", "swap", "root"])
 
         p_map = info.volume.partition_map
         partitions = p_map.partitions
@@ -122,9 +124,12 @@ class MountAdditional(Task):
             partition = getattr(p_map, partition.name)
             os.makedirs(os.path.join(info.root, partition.name))
             if partition.mountopts is None:
-                p_map.root.add_mount(getattr(p_map, partition.name), partition.name)
+                p_map.root.add_mount(
+                    getattr(p_map, partition.name), partition.name)
             else:
-                p_map.root.add_mount(getattr(p_map, partition.name), partition.name, ['--options'] + partition.mountopts)
+                p_map.root.add_mount(
+                    getattr(p_map, partition.name), partition.name,
+                    ['--options'] + partition.mountopts)
 
 
 class MountSpecials(Task):
@@ -197,37 +202,42 @@ class FStab(Task):
         from bootstrapvz.base.fs.partitions.single import SinglePartition
 
         def is_additional(partition):
-            return (not isinstance(partition, (UnformattedPartition, SinglePartition)) and
-                    partition.name not in ["boot", "swap", "root"])
+            return (not isinstance(partition,
+                                   (UnformattedPartition, SinglePartition))
+                    and partition.name not in ["boot", "swap", "root"])
 
         p_map = info.volume.partition_map
         partitions = p_map.partitions
-        mount_points = [{'path': '/',
-                         'partition': p_map.root,
-                         'dump': '1',
-                         'pass_num': '1',
-                         }]
+        mount_points = [{
+            'path': '/',
+            'partition': p_map.root,
+            'dump': '1',
+            'pass_num': '1',
+        }]
         if hasattr(p_map, 'boot'):
-            mount_points.append({'path': '/boot',
-                                 'partition': p_map.boot,
-                                 'dump': '1',
-                                 'pass_num': '2',
-                                 })
+            mount_points.append({
+                'path': '/boot',
+                'partition': p_map.boot,
+                'dump': '1',
+                'pass_num': '2',
+            })
         if hasattr(p_map, 'swap'):
-            mount_points.append({'path': 'none',
-                                 'partition': p_map.swap,
-                                 'dump': '1',
-                                 'pass_num': '0',
-                                 })
+            mount_points.append({
+                'path': 'none',
+                'partition': p_map.swap,
+                'dump': '1',
+                'pass_num': '0',
+            })
 
         for partition in sorted(
                 filter(is_additional, partitions),
                 key=lambda partition: len(partition.name)):
-            mount_points.append({'path': "/" + partition.name,
-                                 'partition': getattr(p_map, partition.name),
-                                 'dump': '1',
-                                 'pass_num': '2',
-                                 })
+            mount_points.append({
+                'path': "/" + partition.name,
+                'partition': getattr(p_map, partition.name),
+                'dump': '1',
+                'pass_num': '2',
+            })
         fstab_lines = []
         for mount_point in mount_points:
             partition = mount_point['partition']
@@ -235,13 +245,15 @@ class FStab(Task):
                 mount_opts = ['defaults']
             else:
                 mount_opts = partition.mountopts
-            fstab_lines.append('UUID={uuid} {mountpoint} {filesystem} {mount_opts} {dump} {pass_num}'
-                               .format(uuid=partition.get_uuid(),
-                                       mountpoint=mount_point['path'],
-                                       filesystem=partition.filesystem,
-                                       mount_opts=','.join(mount_opts),
-                                       dump=mount_point['dump'],
-                                       pass_num=mount_point['pass_num']))
+            fstab_lines.append(
+                'UUID={uuid} {mountpoint} {filesystem} {mount_opts} {dump} {pass_num}'
+                .format(
+                    uuid=partition.get_uuid(),
+                    mountpoint=mount_point['path'],
+                    filesystem=partition.filesystem,
+                    mount_opts=','.join(mount_opts),
+                    dump=mount_point['dump'],
+                    pass_num=mount_point['pass_num']))
 
         fstab_path = os.path.join(info.root, 'etc/fstab')
         with open(fstab_path, 'w') as fstab:

@@ -11,21 +11,24 @@ def validate_manifest(data, validator, error):
 def resolve_tasks(taskset, manifest):
     taskset.update(task_groups.get_standard_groups(manifest))
 
-    taskset.update([tasks.packages.DefaultPackages,
-                    initd.InstallInitScripts,
-                    ssh.AddOpenSSHPackage,
-                    ssh.ShredHostkeys,
-                    ssh.AddSSHKeyGeneration,
-                    ])
+    taskset.update([
+        tasks.packages.DefaultPackages,
+        initd.InstallInitScripts,
+        ssh.AddOpenSSHPackage,
+        ssh.ShredHostkeys,
+        ssh.AddSSHKeyGeneration,
+    ])
     if manifest.volume.get('logicalvolume', []):
-        taskset.update([logicalvolume.AddRequiredCommands,
-                        logicalvolume.Create,
-                        ])
+        taskset.update([
+            logicalvolume.AddRequiredCommands,
+            logicalvolume.Create,
+        ])
     else:
-        taskset.update([loopback.AddRequiredCommands,
-                        loopback.Create,
-                        image.MoveImage,
-                        ])
+        taskset.update([
+            loopback.AddRequiredCommands,
+            loopback.Create,
+            image.MoveImage,
+        ])
 
     if manifest.provider.get('virtio', []):
         from tasks import virtio

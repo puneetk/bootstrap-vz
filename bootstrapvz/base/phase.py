@@ -1,5 +1,3 @@
-
-
 class Phase(object):
     """The Phase class represents a phase a task may be in.
     It has no function other than to act as an anchor in the task graph.

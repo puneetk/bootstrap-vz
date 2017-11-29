@@ -13,17 +13,34 @@ class AbstractPartitionMap(FSMProxy):
     __metaclass__ = ABCMeta
 
     # States the partition map can be in
-    events = [{'name': 'create', 'src': 'nonexistent', 'dst': 'unmapped'},
-              {'name': 'map', 'src': 'unmapped', 'dst': 'mapped'},
-              {'name': 'unmap', 'src': 'mapped', 'dst': 'unmapped'},
-              ]
+    events = [
+        {
+            'name': 'create',
+            'src': 'nonexistent',
+            'dst': 'unmapped'
+        },
+        {
+            'name': 'map',
+            'src': 'unmapped',
+            'dst': 'mapped'
+        },
+        {
+            'name': 'unmap',
+            'src': 'mapped',
+            'dst': 'unmapped'
+        },
+    ]
 
     def __init__(self, bootloader):
         """
         :param str bootloader: Name of the bootloader we will use for bootstrapping
         """
         # Create the configuration for the state machine
-        cfg = {'initial': 'nonexistent', 'events': self.events, 'callbacks': {}}
+        cfg = {
+            'initial': 'nonexistent',
+            'events': self.events,
+            'callbacks': {}
+        }
         super(AbstractPartitionMap, self).__init__(cfg)
 
     def is_blocking(self):
@@ -80,15 +97,18 @@ class AbstractPartitionMap(FSMProxy):
             for mapping in mappings:
                 match = regexp.match(mapping)
                 if match is None:
-                    raise PartitionError('Unable to parse kpartx output: ' + mapping)
-                partition_path = os.path.join('/dev/mapper', match.group('name'))
+                    raise PartitionError(
+                        'Unable to parse kpartx output: ' + mapping)
+                partition_path = os.path.join('/dev/mapper',
+                                              match.group('name'))
                 p_idx = int(match.group('p_idx')) - 1
                 self.partitions[p_idx].map(partition_path)
 
             # Check if any partition was not mapped
             for idx, partition in enumerate(self.partitions):
                 if partition.fsm.current not in ['mapped', 'formatted']:
-                    raise PartitionError('kpartx did not map partition #' + str(partition.get_index()))
+                    raise PartitionError('kpartx did not map partition #' +
+                                         str(partition.get_index()))
 
         except PartitionError:
             # Revert any mapping and reraise the error
@@ -113,7 +133,8 @@ class AbstractPartitionMap(FSMProxy):
         # Run through all partitions before unmapping and make sure they can all be unmapped
         for partition in self.partitions:
             if partition.fsm.cannot('unmap'):
-                msg = 'The partition {partition} prevents the unmap procedure'.format(partition=partition)
+                msg = 'The partition {partition} prevents the unmap procedure'.format(
+                    partition=partition)
                 raise PartitionError(msg)
         # Actually unmap the partitions
         log_check_call(['kpartx', '-ds', volume.device_path])

@@ -29,6 +29,8 @@ class DefaultPackages(Task):
         info.packages.add('uuid-runtime')
 
         kernel_packages_path = rel_path(__file__, 'packages-kernels.yml')
-        kernel_package = config_get(kernel_packages_path, [info.manifest.release.codename,
-                                                           info.manifest.system['architecture']])
+        kernel_package = config_get(kernel_packages_path, [
+            info.manifest.release.codename,
+            info.manifest.system['architecture']
+        ])
         info.packages.add(kernel_package)

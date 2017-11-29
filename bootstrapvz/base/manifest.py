@@ -48,7 +48,8 @@ class Manifest(object):
 
         from . import validate_manifest
         # Validate the manifest with the base validation function in __init__
-        validate_manifest(self.data, self.schema_validator, self.validation_error)
+        validate_manifest(self.data, self.schema_validator,
+                          self.validation_error)
 
     def load_modules(self):
         """Loads the provider and the plugins.
@@ -58,9 +59,10 @@ class Manifest(object):
         log.debug('Loading provider ' + self.data['provider']['name'])
         # Create a modules dict that contains the loaded provider and plugins
         import importlib
-        self.modules = {'provider': importlib.import_module(provider_modname),
-                        'plugins': [],
-                        }
+        self.modules = {
+            'provider': importlib.import_module(provider_modname),
+            'plugins': [],
+        }
         # Run through all the plugins mentioned in the manifest and load them
         from pkg_resources import iter_entry_points
         if 'plugins' in self.data:
@@ -71,7 +73,9 @@ class Manifest(object):
                     modname = 'bootstrapvz.plugins.' + plugin_name
                     plugin = importlib.import_module(modname)
                 except ImportError:
-                    entry_points = list(iter_entry_points('bootstrapvz.plugins', name=plugin_name))
+                    entry_points = list(
+                        iter_entry_points(
+                            'bootstrapvz.plugins', name=plugin_name))
                     num_entry_points = len(entry_points)
                     if num_entry_points < 1:
                         raise
@@ -89,12 +93,14 @@ class Manifest(object):
         """
 
         # Run the provider validation
-        self.modules['provider'].validate_manifest(self.data, self.schema_validator, self.validation_error)
+        self.modules['provider'].validate_manifest(
+            self.data, self.schema_validator, self.validation_error)
         # Run the validation function for any plugin that has it
         for plugin in self.modules['plugins']:
             validate = getattr(plugin, 'validate_manifest', None)
             if callable(validate):
-                validate(self.data, self.schema_validator, self.validation_error)
+                validate(self.data, self.schema_validator,
+                         self.validation_error)
 
     def parse(self):
         """Parses the manifest.
@@ -103,16 +109,17 @@ class Manifest(object):
         don't have to access information with info.manifest.data['section']
         but can do it with info.manifest.section.
         """
-        self.name         = self.data['name']
-        self.provider     = self.data['provider']
+        self.name = self.data['name']
+        self.provider = self.data['provider']
         self.bootstrapper = self.data['bootstrapper']
-        self.volume       = self.data['volume']
-        self.system       = self.data['system']
+        self.volume = self.data['volume']
+        self.system = self.data['system']
         from bootstrapvz.common.releases import get_release
-        self.release      = get_release(self.system['release'])
+        self.release = get_release(self.system['release'])
         # The packages and plugins sections are not required
-        self.packages     = self.data['packages'] if 'packages' in self.data else {}
-        self.plugins      = self.data['plugins'] if 'plugins' in self.data else {}
+        self.packages = self.data[
+            'packages'] if 'packages' in self.data else {}
+        self.plugins = self.data['plugins'] if 'plugins' in self.data else {}
 
     def schema_validator(self, data, schema_path):
         """This convenience function is passed around to all the validation functions
@@ -142,10 +149,12 @@ class Manifest(object):
         raise ManifestError(message, self.path, data_path)
 
     def __getstate__(self):
-        return {'__class__': self.__module__ + '.' + self.__class__.__name__,
-                'path': self.path,
-                'metaschema': self.metaschema,
-                'data': self.data}
+        return {
+            '__class__': self.__module__ + '.' + self.__class__.__name__,
+            'path': self.path,
+            'metaschema': self.metaschema,
+            'data': self.data
+        }
 
     def __setstate__(self, state):
         self.path = state['path']

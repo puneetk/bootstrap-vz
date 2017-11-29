@@ -9,14 +9,17 @@ def validate_manifest(data, validator, error):
     from bootstrapvz.common.tools import rel_path
     validator(data, rel_path(__file__, 'manifest-schema.yml'))
 
-    if data['plugins']['minimize_size'].get('shrink', False) and data['volume']['backing'] != 'vmdk':
-        error('Can only shrink vmdk images', ['plugins', 'minimize_size', 'shrink'])
+    if data['plugins']['minimize_size'].get(
+            'shrink', False) and data['volume']['backing'] != 'vmdk':
+        error('Can only shrink vmdk images',
+              ['plugins', 'minimize_size', 'shrink'])
 
 
 def resolve_tasks(taskset, manifest):
-    taskset.update([tasks.mounts.AddFolderMounts,
-                    tasks.mounts.RemoveFolderMounts,
-                    ])
+    taskset.update([
+        tasks.mounts.AddFolderMounts,
+        tasks.mounts.RemoveFolderMounts,
+    ])
     if manifest.plugins['minimize_size'].get('zerofree', False):
         taskset.add(tasks.shrink.AddRequiredCommands)
         taskset.add(tasks.shrink.Zerofree)
@@ -34,11 +37,12 @@ def resolve_tasks(taskset, manifest):
         if apt.get('autoremove_suggests', False):
             taskset.add(tasks.apt.AptAutoremoveSuggests)
     if 'dpkg' in manifest.plugins['minimize_size']:
-        filter_tasks = [tasks.dpkg.CreateDpkgCfg,
-                        tasks.dpkg.InitializeBootstrapFilterList,
-                        tasks.dpkg.CreateBootstrapFilterScripts,
-                        tasks.dpkg.DeleteBootstrapFilterScripts,
-                        ]
+        filter_tasks = [
+            tasks.dpkg.CreateDpkgCfg,
+            tasks.dpkg.InitializeBootstrapFilterList,
+            tasks.dpkg.CreateBootstrapFilterScripts,
+            tasks.dpkg.DeleteBootstrapFilterScripts,
+        ]
         dpkg = manifest.plugins['minimize_size']['dpkg']
         if 'locales' in dpkg:
             taskset.update(filter_tasks)
@@ -53,5 +57,7 @@ def resolve_tasks(taskset, manifest):
 
 
 def resolve_rollback_tasks(taskset, manifest, completed, counter_task):
-    counter_task(taskset, tasks.mounts.AddFolderMounts, tasks.mounts.RemoveFolderMounts)
-    counter_task(taskset, tasks.dpkg.CreateBootstrapFilterScripts, tasks.dpkg.DeleteBootstrapFilterScripts)
+    counter_task(taskset, tasks.mounts.AddFolderMounts,
+                 tasks.mounts.RemoveFolderMounts)
+    counter_task(taskset, tasks.dpkg.CreateBootstrapFilterScripts,
+                 tasks.dpkg.DeleteBootstrapFilterScripts)

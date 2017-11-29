@@ -48,7 +48,6 @@ Options:
 
 
 class Server(object):
-
     def __init__(self, listen_port, log_forwarder):
         self.stop_serving = False
         self.log_forwarder = log_forwarder
@@ -56,7 +55,8 @@ class Server(object):
 
     def start(self):
         Pyro4.config.COMMTIMEOUT = 0.5
-        daemon = Pyro4.Daemon('localhost', port=int(self.listen_port), unixsocket=None)
+        daemon = Pyro4.Daemon(
+            'localhost', port=int(self.listen_port), unixsocket=None)
         daemon.register(self, 'server')
 
         daemon.requestLoop(loopCondition=lambda: not self.stop_serving)
@@ -89,7 +89,6 @@ class Server(object):
 
     @Pyro4.expose
     def run(self, manifest, debug=False, dry_run=False):
-
         def bootstrap(queue):
             # setsid() creates a new session, making this process the group leader.
             # We do that, so when the server calls killpg (kill process group)
@@ -120,7 +119,7 @@ class Server(object):
         from multiprocessing import Queue
         from multiprocessing import Process
         queue = Queue()
-        self.bootstrap_process = Process(target=bootstrap, args=(queue,))
+        self.bootstrap_process = Process(target=bootstrap, args=(queue, ))
         self.bootstrap_process.start()
         self.bootstrap_process.join()
         del self.bootstrap_process

@@ -4,7 +4,9 @@ from base import BasePartition
 class MSDOSPartition(BasePartition):
     """Represents an MS-DOS partition
     """
-    def __init__(self, size, filesystem, format_command, mountopts, name, previous):
+
+    def __init__(self, size, filesystem, format_command, mountopts, name,
+                 previous):
         """
         :param Bytes size: Size of the partition
         :param str filesystem: Filesystem the partition should be formatted with
@@ -13,4 +15,5 @@ class MSDOSPartition(BasePartition):
         :param BasePartition previous: The partition that preceeds this one
         """
         self.name = name
-        super(MSDOSPartition, self).__init__(size, filesystem, format_command, mountopts, previous)
+        super(MSDOSPartition, self).__init__(size, filesystem, format_command,
+                                             mountopts, previous)

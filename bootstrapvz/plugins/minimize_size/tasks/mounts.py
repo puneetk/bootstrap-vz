@@ -14,15 +14,18 @@ class AddFolderMounts(Task):
 
     @classmethod
     def run(cls, info):
-        info._minimize_size['foldermounts'] = os.path.join(info.workspace, 'minimize_size')
+        info._minimize_size['foldermounts'] = os.path.join(
+            info.workspace, 'minimize_size')
         os.mkdir(info._minimize_size['foldermounts'])
         for folder in folders:
-            temp_path = os.path.join(info._minimize_size['foldermounts'], folder.replace('/', '_'))
+            temp_path = os.path.join(info._minimize_size['foldermounts'],
+                                     folder.replace('/', '_'))
             os.mkdir(temp_path)
 
             full_path = os.path.join(info.root, folder)
             os.chmod(temp_path, os.stat(full_path).st_mode)
-            info.volume.partition_map.root.add_mount(temp_path, full_path, ['--bind'])
+            info.volume.partition_map.root.add_mount(temp_path, full_path,
+                                                     ['--bind'])
 
 
 class RemoveFolderMounts(Task):
@@ -34,7 +37,8 @@ class RemoveFolderMounts(Task):
     def run(cls, info):
         import shutil
         for folder in folders:
-            temp_path = os.path.join(info._minimize_size['foldermounts'], folder.replace('/', '_'))
+            temp_path = os.path.join(info._minimize_size['foldermounts'],
+                                     folder.replace('/', '_'))
             full_path = os.path.join(info.root, folder)
 
             info.volume.partition_map.root.remove_mount(full_path)

@@ -1,5 +1,3 @@
-
-
 class Task(object):
     """The task class represents a task that can be run.
     It is merely a wrapper for the run function and should never be instantiated.
@@ -14,6 +12,7 @@ class Task(object):
     class __metaclass__(type):
         """Metaclass to control how the class is coerced into a string
         """
+
         def __repr__(cls):
             """
             :return str: The full module path to the Task

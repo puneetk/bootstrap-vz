@@ -6,15 +6,16 @@ from bootstrapvz.common.tools import log_check_call
 class Mount(object):
     """Represents a mount into the partition
     """
+
     def __init__(self, source, destination, opts):
         """
         :param str,AbstractPartition source: The path from where we mount or a partition
         :param str destination: The path of the mountpoint
         :param list opts: List of options to pass to the mount command
         """
-        self.source      = source
+        self.source = source
         self.destination = destination
-        self.opts        = opts
+        self.opts = opts
 
     def mount(self, prefix):
         """Performs the mount operation or forwards it to another partition

@@ -1,5 +1,3 @@
-
-
 def resolve_tasks(taskset, manifest):
     import tasks
     from bootstrapvz.common.tasks import apt

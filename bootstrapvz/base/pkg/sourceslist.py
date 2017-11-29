@@ -1,5 +1,3 @@
-
-
 class SourceLists(object):
     """Represents a list of sources lists for apt
     """
@@ -87,9 +85,12 @@ class Source(object):
 
         components = ''
         if len(self.components) > 0:
-            components = ' {components}'.format(components=' '.join(self.components))
+            components = ' {components}'.format(
+                components=' '.join(self.components))
 
-        return ('{type}{options} {uri} {distribution}{components}'
-                .format(type=self.type, options=options,
-                        uri=self.uri, distribution=self.distribution,
-                        components=components))
+        return ('{type}{options} {uri} {distribution}{components}'.format(
+            type=self.type,
+            options=options,
+            uri=self.uri,
+            distribution=self.distribution,
+            components=components))

@@ -8,7 +8,8 @@ class Create(Task):
 
     @classmethod
     def run(cls, info):
-        info.volume.create(info._ec2['connection'], info._ec2['host']['availabilityZone'])
+        info.volume.create(info._ec2['connection'],
+                           info._ec2['host']['availabilityZone'])
 
 
 class Attach(Task):
@@ -32,7 +33,10 @@ class Snapshot(Task):
         # Setting up tags on the snapshot
         if 'tags' in info.manifest.data:
             raw_tags = info.manifest.data['tags']
-            formatted_tags = {k: v.format(**info.manifest_vars) for k, v in raw_tags.items()}
+            formatted_tags = {
+                k: v.format(**info.manifest_vars)
+                for k, v in raw_tags.items()
+            }
             tags = [{'Key': k, 'Value': v} for k, v in formatted_tags.items()]
-            info._ec2['connection'].create_tags(Resources=[info._ec2['snapshot']],
-                                                Tags=tags)
+            info._ec2['connection'].create_tags(
+                Resources=[info._ec2['snapshot']], Tags=tags)

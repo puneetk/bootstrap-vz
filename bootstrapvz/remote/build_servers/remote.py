@@ -6,7 +6,6 @@ log = logging.getLogger(__name__)
 
 
 class RemoteBuildServer(BuildServer):
-
     def __init__(self, name, settings):
         super(RemoteBuildServer, self).__init__(name, settings)
         self.address = settings['address']
@@ -19,11 +18,14 @@ class RemoteBuildServer(BuildServer):
     @contextmanager
     def connect(self):
         with self.spawn_server() as forwards:
-            args = {'listen_port': forwards['local_callback_port'],
-                    'remote_port': forwards['remote_callback_port']}
+            args = {
+                'listen_port': forwards['local_callback_port'],
+                'remote_port': forwards['remote_callback_port']
+            }
             from callback import CallbackServer
             with CallbackServer(**args) as callback_server:
-                with connect_pyro('localhost', forwards['local_server_port']) as connection:
+                with connect_pyro('localhost',
+                                  forwards['local_server_port']) as connection:
                     connection.set_callback_server(callback_server)
                     yield connection
 
@@ -36,7 +38,10 @@ class RemoteBuildServer(BuildServer):
         [local_server_port, local_callback_port] = getNPorts(2)
         [remote_server_port, remote_callback_port] = getNPorts(2)
 
-        server_cmd = ['sudo', self.server_bin, '--listen', str(remote_server_port)]
+        server_cmd = [
+            'sudo', self.server_bin, '--listen',
+            str(remote_server_port)
+        ]
 
         def set_process_group():
             # Changes the process group of a command so that any SIGINT
@@ -45,31 +50,42 @@ class RemoteBuildServer(BuildServer):
             import os
             os.setpgrp()
 
-        addr_arg = '{user}@{host}'.format(user=self.username, host=self.address)
-        ssh_cmd = ['ssh', '-i', self.keyfile,
-                          '-p', str(self.port),
-                          '-L' + str(local_server_port) + ':localhost:' + str(remote_server_port),
-                          '-R' + str(remote_callback_port) + ':localhost:' + str(local_callback_port),
-                          addr_arg]
+        addr_arg = '{user}@{host}'.format(
+            user=self.username, host=self.address)
+        ssh_cmd = [
+            'ssh', '-i', self.keyfile, '-p',
+            str(self.port), '-L' + str(local_server_port) + ':localhost:' +
+            str(remote_server_port), '-R' + str(remote_callback_port) +
+            ':localhost:' + str(local_callback_port), addr_arg
+        ]
         full_cmd = ssh_cmd + ['--'] + server_cmd
 
-        log.debug('Opening SSH connection to build server `{name}\''.format(name=self.name))
+        log.debug('Opening SSH connection to build server `{name}\''.format(
+            name=self.name))
         import sys
         import subprocess
-        ssh_process = subprocess.Popen(args=full_cmd, stdout=sys.stderr, stderr=sys.stderr,
-                                       preexec_fn=set_process_group)
+        ssh_process = subprocess.Popen(
+            args=full_cmd,
+            stdout=sys.stderr,
+            stderr=sys.stderr,
+            preexec_fn=set_process_group)
         try:
-            yield {'local_server_port': local_server_port,
-                   'local_callback_port': local_callback_port,
-                   'remote_server_port': remote_server_port,
-                   'remote_callback_port': remote_callback_port}
+            yield {
+                'local_server_port': local_server_port,
+                'local_callback_port': local_callback_port,
+                'remote_server_port': remote_server_port,
+                'remote_callback_port': remote_callback_port
+            }
         finally:
-            log.debug('Waiting for SSH connection to the build server to close')
+            log.debug(
+                'Waiting for SSH connection to the build server to close')
             import time
             start = time.time()
             while ssh_process.poll() is None:
                 if time.time() - start > 5:
-                    log.debug('Forcefully terminating SSH connection to the build server')
+                    log.debug(
+                        'Forcefully terminating SSH connection to the build server'
+                    )
                     ssh_process.terminate()
                     break
                 else:
@@ -77,23 +93,26 @@ class RemoteBuildServer(BuildServer):
 
     def download(self, src, dst):
         log.debug('Downloading file `{src}\' from '
-                  'build server `{name}\' to `{dst}\''
-                  .format(src=src, dst=dst, name=self.name))
+                  'build server `{name}\' to `{dst}\''.format(
+                      src=src, dst=dst, name=self.name))
         # Make sure we can read the file as {user}
         self.remote_command(['sudo', 'chown', self.username, src])
-        src_arg = '{user}@{host}:{path}'.format(user=self.username, host=self.address, path=src)
-        log_check_call(['scp', '-i', self.keyfile, '-P', str(self.port),
-                        src_arg, dst])
+        src_arg = '{user}@{host}:{path}'.format(
+            user=self.username, host=self.address, path=src)
+        log_check_call(
+            ['scp', '-i', self.keyfile, '-P',
+             str(self.port), src_arg, dst])
 
     def delete(self, path):
-        log.debug('Deleting file `{path}\' on build server `{name}\''.format(path=path, name=self.name))
+        log.debug('Deleting file `{path}\' on build server `{name}\''.format(
+            path=path, name=self.name))
         self.remote_command(['sudo', 'rm', path])
 
     def remote_command(self, command):
-        ssh_cmd = ['ssh', '-i', self.keyfile,
-                          '-p', str(self.port),
-                          self.username + '@' + self.address,
-                          '--'] + command
+        ssh_cmd = [
+            'ssh', '-i', self.keyfile, '-p',
+            str(self.port), self.username + '@' + self.address, '--'
+        ] + command
         log_check_call(ssh_cmd)
 
 
@@ -112,7 +131,8 @@ def connect_pyro(host, port):
             try:
                 connection.ping()
                 connected = True
-            except (Pyro4.errors.ConnectionClosedError, Pyro4.errors.CommunicationError):
+            except (Pyro4.errors.ConnectionClosedError,
+                    Pyro4.errors.CommunicationError):
                 if remaining_retries > 0:
                     remaining_retries -= 1
                     from time import sleep
@@ -127,4 +147,6 @@ def connect_pyro(host, port):
             connection.stop()
             connection._pyroRelease()
         else:
-            log.warn('Unable to stop RPC daemon, it might still be running on the server')
+            log.warn(
+                'Unable to stop RPC daemon, it might still be running on the server'
+            )

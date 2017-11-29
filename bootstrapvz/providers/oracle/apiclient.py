@@ -24,11 +24,13 @@ class OracleStorageAPIClient:
     @property
     def auth_token(self):
         headers = {
-            'X-Storage-User': 'Storage-{id_domain}:{user}'.format(
+            'X-Storage-User':
+            'Storage-{id_domain}:{user}'.format(
                 id_domain=self.identity_domain,
                 user=self.username,
             ),
-            'X-Storage-Pass': self.password,
+            'X-Storage-Pass':
+            self.password,
         }
         url = self.base_url + '/auth/v1.0'
         response = requests.get(url, headers=headers)
@@ -65,12 +67,15 @@ class OracleStorageAPIClient:
 
     def create_manifest(self):
         headers = {
-            'X-Auth-Token': self.auth_token,
-            'X-Object-Manifest': '{container}/{object_name}-'.format(
+            'X-Auth-Token':
+            self.auth_token,
+            'X-Object-Manifest':
+            '{container}/{object_name}-'.format(
                 container=self.container,
                 object_name=self.file_name,
             ),
-            'Content-Length': '0',
+            'Content-Length':
+            '0',
         }
         url = self.object_url
         self.log.debug('Creating remote manifest to join chunks')

@@ -1,5 +1,3 @@
-
-
 class PackageError(Exception):
     """Raised when an error occurrs while handling the packageslist
     """

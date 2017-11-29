@@ -47,30 +47,48 @@ class InstallNetworkingUDevHotplugAndDHCPSubinterface(Task):
         script_dst = os.path.join(info.root, 'etc')
 
         import stat
-        rwxr_xr_x = (stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |
-                     stat.S_IRGRP                | stat.S_IXGRP |
-                     stat.S_IROTH                | stat.S_IXOTH)
+        rwxr_xr_x = (stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP
+                     | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)
 
         from shutil import copy
-        copy(os.path.join(script_src, '53-ec2-network-interfaces.rules'),
-             os.path.join(script_dst, 'udev/rules.d/53-ec2-network-interfaces.rules'))
-        os.chmod(os.path.join(script_dst, 'udev/rules.d/53-ec2-network-interfaces.rules'), rwxr_xr_x)
+        copy(
+            os.path.join(script_src, '53-ec2-network-interfaces.rules'),
+            os.path.join(script_dst,
+                         'udev/rules.d/53-ec2-network-interfaces.rules'))
+        os.chmod(
+            os.path.join(script_dst,
+                         'udev/rules.d/53-ec2-network-interfaces.rules'),
+            rwxr_xr_x)
 
         os.mkdir(os.path.join(script_dst, 'sysconfig'), 0755)
         os.mkdir(os.path.join(script_dst, 'sysconfig/network-scripts'), 0755)
-        copy(os.path.join(script_src, 'ec2net.hotplug'),
-             os.path.join(script_dst, 'sysconfig/network-scripts/ec2net.hotplug'))
-        os.chmod(os.path.join(script_dst, 'sysconfig/network-scripts/ec2net.hotplug'), rwxr_xr_x)
+        copy(
+            os.path.join(script_src, 'ec2net.hotplug'),
+            os.path.join(script_dst,
+                         'sysconfig/network-scripts/ec2net.hotplug'))
+        os.chmod(
+            os.path.join(script_dst,
+                         'sysconfig/network-scripts/ec2net.hotplug'),
+            rwxr_xr_x)
 
-        copy(os.path.join(script_src, 'ec2net-functions'),
-             os.path.join(script_dst, 'sysconfig/network-scripts/ec2net-functions'))
-        os.chmod(os.path.join(script_dst, 'sysconfig/network-scripts/ec2net-functions'), rwxr_xr_x)
+        copy(
+            os.path.join(script_src, 'ec2net-functions'),
+            os.path.join(script_dst,
+                         'sysconfig/network-scripts/ec2net-functions'))
+        os.chmod(
+            os.path.join(script_dst,
+                         'sysconfig/network-scripts/ec2net-functions'),
+            rwxr_xr_x)
 
-        copy(os.path.join(script_src, 'ec2dhcp.sh'),
-             os.path.join(script_dst, 'dhcp/dhclient-exit-hooks.d/ec2dhcp.sh'))
-        os.chmod(os.path.join(script_dst, 'dhcp/dhclient-exit-hooks.d/ec2dhcp.sh'), rwxr_xr_x)
+        copy(
+            os.path.join(script_src, 'ec2dhcp.sh'),
+            os.path.join(script_dst, 'dhcp/dhclient-exit-hooks.d/ec2dhcp.sh'))
+        os.chmod(
+            os.path.join(script_dst, 'dhcp/dhclient-exit-hooks.d/ec2dhcp.sh'),
+            rwxr_xr_x)
 
-        with open(os.path.join(script_dst, 'network/interfaces'), "a") as interfaces:
+        with open(os.path.join(script_dst, 'network/interfaces'),
+                  "a") as interfaces:
             interfaces.write("iface eth1 inet dhcp\n")
             interfaces.write("iface eth2 inet dhcp\n")
             interfaces.write("iface eth3 inet dhcp\n")
@@ -96,18 +114,19 @@ class InstallEnhancedNetworking(Task):
             drivers_url = 'https://downloadmirror.intel.com/26561/eng/ixgbevf-3.2.2.tar.gz'
         # Sadly the first number in the URL changes:
         # 2.16.1 => https://downloadmirror.intel.com/25464/eng/ixgbevf-2.16.1.tar.gz
-        archive = os.path.join(info.root, 'tmp', 'ixgbevf-%s.tar.gz' % (version))
-        module_path = os.path.join(info.root, 'usr', 'src', 'ixgbevf-%s' % (version))
+        archive = os.path.join(info.root, 'tmp',
+                               'ixgbevf-%s.tar.gz' % (version))
+        module_path = os.path.join(info.root, 'usr', 'src',
+                                   'ixgbevf-%s' % (version))
 
         import urllib
         urllib.urlretrieve(drivers_url, archive)
 
         from bootstrapvz.common.tools import log_check_call
-        log_check_call(['tar', '--ungzip',
-                               '--extract',
-                               '--file', archive,
-                               '--directory', os.path.join(info.root, 'usr',
-                                                           'src')])
+        log_check_call([
+            'tar', '--ungzip', '--extract', '--file', archive, '--directory',
+            os.path.join(info.root, 'usr', 'src')
+        ])
 
         with open(os.path.join(module_path, 'dkms.conf'), 'w') as dkms_conf:
             dkms_conf.write("""PACKAGE_NAME="ixgbevf"
@@ -123,9 +142,10 @@ AUTOINSTALL="yes"
 
         for task in ['add', 'build', 'install']:
             # Invoke DKMS task using specified kernel module (-m) and version (-v)
-            log_check_call(['chroot', info.root,
-                            'dkms', task, '-m', 'ixgbevf', '-v', version, '-k',
-                            info.kernel_version])
+            log_check_call([
+                'chroot', info.root, 'dkms', task, '-m', 'ixgbevf', '-v',
+                version, '-k', info.kernel_version
+            ])
 
 
 class InstallENANetworking(Task):
@@ -157,6 +177,7 @@ AUTOINSTALL="yes"
 
         for task in ['add', 'build', 'install']:
             # Invoke DKMS task using specified kernel module (-m) and version (-v)
-            log_check_call(['chroot', info.root,
-                            'dkms', task, '-m', 'amzn-drivers', '-v', version,
-                            '-k', info.kernel_version])
+            log_check_call([
+                'chroot', info.root, 'dkms', task, '-m', 'amzn-drivers', '-v',
+                version, '-k', info.kernel_version
+            ])

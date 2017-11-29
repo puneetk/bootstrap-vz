@@ -24,15 +24,16 @@ def resolve_tasks(taskset, manifest):
     taskset.update(task_groups.get_standard_groups(manifest))
     taskset.update(task_groups.ssh_group)
 
-    taskset.update([loopback.AddRequiredCommands,
-                    loopback.Create,
-                    image.MoveImage,
-                    ssh.DisableRootLogin,
-                    volume.Delete,
-                    tasks.image.CreateImageTarball,
-                    tasks.network.InstallDHCPCD,
-                    tasks.packages.DefaultPackages,
-                    ])
+    taskset.update([
+        loopback.AddRequiredCommands,
+        loopback.Create,
+        image.MoveImage,
+        ssh.DisableRootLogin,
+        volume.Delete,
+        tasks.image.CreateImageTarball,
+        tasks.network.InstallDHCPCD,
+        tasks.packages.DefaultPackages,
+    ])
 
     if 'credentials' in manifest.provider:
         taskset.add(tasks.api.Connect)

@@ -25,8 +25,8 @@ class CheckExternalCommands(Task):
                            .format(command=command, package=package))
                 else:
                     msg = ('The command `{command}\' is not available, '
-                           'it is located in the package `{package}\'.'
-                           .format(command=command, package=package))
+                           'it is located in the package `{package}\'.'.format(
+                               command=command, package=package))
                 missing_packages.append(msg)
         if len(missing_packages) > 0:
             msg = '\n'.join(missing_packages)

@@ -1,5 +1,3 @@
-
-
 class PackageList(object):
     """Represents a list of packages
     """
@@ -7,6 +5,7 @@ class PackageList(object):
     class Remote(object):
         """A remote package with an optional target
         """
+
         def __init__(self, name, target):
             """
             :param str name: The name of the package
@@ -28,6 +27,7 @@ class PackageList(object):
     class Local(object):
         """A local package
         """
+
         def __init__(self, path):
             """
             :param str path: The path to the local package
@@ -72,7 +72,8 @@ class PackageList(object):
             target = target.format(**self.manifest_vars)
         # Check if the package has already been added.
         # If so, make sure it's the same target and raise a PackageError otherwise
-        package = next((pkg for pkg in self.remote() if pkg.name == name), None)
+        package = next((pkg for pkg in self.remote() if pkg.name == name),
+                       None)
         if package is not None:
             # It's the same target if the target names match or one of the targets is None
             # and the other is the default target.
@@ -80,17 +81,22 @@ class PackageList(object):
             same_target = same_target or package.target is None and target == self.default_target
             same_target = same_target or package.target == self.default_target and target is None
             if not same_target:
-                msg = ('The package {name} was already added to the package list, '
-                       'but with target release `{target}\' instead of `{add_target}\''
-                       .format(name=name, target=package.target, add_target=target))
+                msg = (
+                    'The package {name} was already added to the package list, '
+                    'but with target release `{target}\' instead of `{add_target}\''
+                    .format(
+                        name=name, target=package.target, add_target=target))
                 raise PackageError(msg)
             # The package has already been added, skip the checks below
             return
 
         # Check if the target exists (unless it's the default target) in the sources list
         # raise a PackageError if does not
-        if target not in (None, self.default_target) and not self.source_lists.target_exists(target):
-            msg = ('The target release {target} was not found in the sources list').format(target=target)
+        if target not in (None, self.default_target
+                          ) and not self.source_lists.target_exists(target):
+            msg = (
+                'The target release {target} was not found in the sources list'
+            ).format(target=target)
             raise PackageError(msg)
 
         # Note that we maintain the target value even if it is none.

@@ -1,5 +1,3 @@
-
-
 class VolumeError(Exception):
     """Raised when an error occurs while interacting with the volume
     """

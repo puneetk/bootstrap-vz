@@ -3,7 +3,6 @@ from bootstrapvz.base.fs.exceptions import VolumeError
 
 
 class EBSVolume(Volume):
-
     def create(self, conn, zone):
         self.fsm.create(connection=conn, zone=zone)
 
@@ -11,13 +10,16 @@ class EBSVolume(Volume):
         self.conn = e.connection
         zone = e.zone
         size = self.size.bytes.get_qty_in('GiB')
-        self.volume = self.conn.create_volume(Size=size,
-                                              AvailabilityZone=zone,
-                                              VolumeType='gp2')
+        self.volume = self.conn.create_volume(
+            Size=size, AvailabilityZone=zone, VolumeType='gp2')
         self.vol_id = self.volume['VolumeId']
         waiter = self.conn.get_waiter('volume_available')
-        waiter.wait(VolumeIds=[self.vol_id],
-                    Filters=[{'Name': 'status', 'Values': ['available']}])
+        waiter.wait(
+            VolumeIds=[self.vol_id],
+            Filters=[{
+                'Name': 'status',
+                'Values': ['available']
+            }])
 
     def attach(self, instance_id):
         self.fsm.attach(instance_id=instance_id)
@@ -35,22 +37,34 @@ class EBSVolume(Volume):
                 break
 
         if self.device_path is None:
-            raise VolumeError('Unable to find a free block device path for mounting the bootstrap volume')
+            raise VolumeError(
+                'Unable to find a free block device path for mounting the bootstrap volume'
+            )
 
-        self.conn.attach_volume(VolumeId=self.vol_id,
-                                InstanceId=self.instance_id,
-                                Device=self.ec2_device_path)
+        self.conn.attach_volume(
+            VolumeId=self.vol_id,
+            InstanceId=self.instance_id,
+            Device=self.ec2_device_path)
         waiter = self.conn.get_waiter('volume_in_use')
-        waiter.wait(VolumeIds=[self.vol_id],
-                    Filters=[{'Name': 'attachment.status', 'Values': ['attached']}])
+        waiter.wait(
+            VolumeIds=[self.vol_id],
+            Filters=[{
+                'Name': 'attachment.status',
+                'Values': ['attached']
+            }])
 
     def _before_detach(self, e):
-        self.conn.detach_volume(VolumeId=self.vol_id,
-                                InstanceId=self.instance_id,
-                                Device=self.ec2_device_path)
+        self.conn.detach_volume(
+            VolumeId=self.vol_id,
+            InstanceId=self.instance_id,
+            Device=self.ec2_device_path)
         waiter = self.conn.get_waiter('volume_available')
-        waiter.wait(VolumeIds=[self.vol_id],
-                    Filters=[{'Name': 'status', 'Values': ['available']}])
+        waiter.wait(
+            VolumeIds=[self.vol_id],
+            Filters=[{
+                'Name': 'status',
+                'Values': ['available']
+            }])
         del self.ec2_device_path
         self.device_path = None
 
@@ -61,6 +75,10 @@ class EBSVolume(Volume):
         snapshot = self.conn.create_snapshot(VolumeId=self.vol_id)
         self.snap_id = snapshot['SnapshotId']
         waiter = self.conn.get_waiter('snapshot_completed')
-        waiter.wait(SnapshotIds=[self.snap_id],
-                    Filters=[{'Name': 'status', 'Values': ['completed']}])
+        waiter.wait(
+            SnapshotIds=[self.snap_id],
+            Filters=[{
+                'Name': 'status',
+                'Values': ['completed']
+            }])
         return self.snap_id

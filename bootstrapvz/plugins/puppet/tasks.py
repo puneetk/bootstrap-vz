@@ -7,7 +7,6 @@ from bootstrapvz.common.releases import jessie, wheezy, stretch
 from bootstrapvz.common.tools import sed_i, log_check_call, rel_path
 from __builtin__ import str
 
-
 ASSETS_DIR_STRETCH = rel_path(__file__, 'assets/gpg-keyrings-PC1/stretch')
 ASSETS_DIR_JESSIE = rel_path(__file__, 'assets/gpg-keyrings-PC1/jessie')
 ASSETS_DIR_WHEEZY = rel_path(__file__, 'assets/gpg-keyrings-PC1/wheezy')
@@ -35,10 +34,12 @@ class CheckAssetsPath(Task):
         from bootstrapvz.common.exceptions import TaskError
         assets = info.manifest.plugins['puppet']['assets']
         if not os.path.exists(assets):
-            msg = 'The assets directory {assets} does not exist.'.format(assets=assets)
+            msg = 'The assets directory {assets} does not exist.'.format(
+                assets=assets)
             raise TaskError(msg)
         if not os.path.isdir(assets):
-            msg = 'The assets path {assets} does not point to a directory.'.format(assets=assets)
+            msg = 'The assets path {assets} does not point to a directory.'.format(
+                assets=assets)
             raise TaskError(msg)
 
 
@@ -51,10 +52,12 @@ class CheckManifestPath(Task):
     def run(cls, info):
         manifest = info.manifest.plugins['puppet']['manifest']
         if not os.path.exists(manifest):
-            msg = 'The manifest file {manifest} does not exist.'.format(manifest=manifest)
+            msg = 'The manifest file {manifest} does not exist.'.format(
+                manifest=manifest)
             raise TaskError(msg)
         if not os.path.isfile(manifest):
-            msg = 'The manifest path {manifest} does not point to a file.'.format(manifest=manifest)
+            msg = 'The manifest path {manifest} does not point to a file.'.format(
+                manifest=manifest)
             raise TaskError(msg)
 
 
@@ -67,12 +70,16 @@ class InstallPuppetlabsPC1ReleaseKey(Task):
     def run(cls, info):
         from shutil import copy
         if (info.manifest.release == stretch):
-            key_path = os.path.join(ASSETS_DIR_STRETCH, 'puppetlabs-pc1-keyring.gpg')
+            key_path = os.path.join(ASSETS_DIR_STRETCH,
+                                    'puppetlabs-pc1-keyring.gpg')
         if (info.manifest.release == jessie):
-            key_path = os.path.join(ASSETS_DIR_JESSIE, 'puppetlabs-pc1-keyring.gpg')
+            key_path = os.path.join(ASSETS_DIR_JESSIE,
+                                    'puppetlabs-pc1-keyring.gpg')
         if (info.manifest.release == wheezy):
-            key_path = os.path.join(ASSETS_DIR_WHEEZY, 'puppetlabs-pc1-keyring.gpg')
-        destination = os.path.join(info.root, 'etc/apt/trusted.gpg.d/puppetlabs-pc1-keyring.gpg')
+            key_path = os.path.join(ASSETS_DIR_WHEEZY,
+                                    'puppetlabs-pc1-keyring.gpg')
+        destination = os.path.join(
+            info.root, 'etc/apt/trusted.gpg.d/puppetlabs-pc1-keyring.gpg')
         copy(key_path, destination)
 
 
@@ -83,11 +90,14 @@ class AddPuppetlabsPC1SourcesList(Task):
     @classmethod
     def run(cls, info):
         if (info.manifest.release == stretch):
-            info.source_lists.add('puppetlabs', 'deb http://apt.puppetlabs.com stretch PC1')
+            info.source_lists.add('puppetlabs',
+                                  'deb http://apt.puppetlabs.com stretch PC1')
         if (info.manifest.release == jessie):
-            info.source_lists.add('puppetlabs', 'deb http://apt.puppetlabs.com jessie PC1')
+            info.source_lists.add('puppetlabs',
+                                  'deb http://apt.puppetlabs.com jessie PC1')
         if (info.manifest.release == wheezy):
-            info.source_lists.add('puppetlabs', 'deb http://apt.puppetlabs.com wheezy PC1')
+            info.source_lists.add('puppetlabs',
+                                  'deb http://apt.puppetlabs.com wheezy PC1')
 
 
 class InstallPuppetAgent(Task):
@@ -96,7 +106,10 @@ class InstallPuppetAgent(Task):
 
     @classmethod
     def run(cls, info):
-        log_check_call(['chroot', info.root, 'apt-get', 'install', '--assume-yes', 'puppet-agent'])
+        log_check_call([
+            'chroot', info.root, 'apt-get', 'install', '--assume-yes',
+            'puppet-agent'
+        ])
 
 
 class InstallModules(Task):
@@ -107,7 +120,10 @@ class InstallModules(Task):
     @classmethod
     def run(cls, info):
         for module in info.manifest.plugins['puppet']['install_modules']:
-            command = ['chroot', info.root, '/opt/puppetlabs/bin/puppet', 'module', 'install', '--force']
+            command = [
+                'chroot', info.root, '/opt/puppetlabs/bin/puppet', 'module',
+                'install', '--force'
+            ]
             if (len(module) == 1):
                 [module_name] = module
                 command.append(str(module_name))
@@ -127,7 +143,8 @@ class CopyPuppetAssets(Task):
     @classmethod
     def run(cls, info):
         from bootstrapvz.common.tools import copy_tree
-        copy_tree(info.manifest.plugins['puppet']['assets'], os.path.join(info.root, 'etc/puppetlabs/'))
+        copy_tree(info.manifest.plugins['puppet']['assets'],
+                  os.path.join(info.root, 'etc/puppetlabs/'))
 
 
 class ApplyPuppetManifest(Task):
@@ -147,10 +164,16 @@ class ApplyPuppetManifest(Task):
         manifest_dst = os.path.join(info.root, manifest_rel_dst)
         copy(pp_manifest, manifest_dst)
         manifest_path = os.path.join('/', manifest_rel_dst)
-        log_check_call(['chroot', info.root, 'puppet', 'apply', '--verbose', '--debug', manifest_path])
+        log_check_call([
+            'chroot', info.root, 'puppet', 'apply', '--verbose', '--debug',
+            manifest_path
+        ])
         os.remove(manifest_dst)
         hosts_path = os.path.join(info.root, 'etc/hosts')
-        sed_i(hosts_path, '127.0.0.1\s*{hostname}\n?'.format(hostname=hostname), '')
+        sed_i(
+            hosts_path,
+            '127.0.0.1\s*{hostname}\n?'.format(hostname=hostname),
+            '')
 
 
 class EnableAgent(Task):

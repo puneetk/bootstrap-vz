@@ -6,16 +6,19 @@ log = logging.getLogger(__name__)
 
 
 class CallbackServer(object):
-
     def __init__(self, listen_port, remote_port):
-        self.daemon = Pyro4.Daemon(host='localhost', port=listen_port,
-                                   nathost='localhost', natport=remote_port,
-                                   unixsocket=None)
+        self.daemon = Pyro4.Daemon(
+            host='localhost',
+            port=listen_port,
+            nathost='localhost',
+            natport=remote_port,
+            unixsocket=None)
         self.daemon.register(self)
 
     def __enter__(self):
         def serve():
             self.daemon.requestLoop()
+
         from threading import Thread
         self.thread = Thread(target=serve)
         log.debug('Starting callback server')

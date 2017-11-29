@@ -12,7 +12,8 @@ class Connect(Task):
         info._oracle['client'] = OracleStorageAPIClient(
             username=info.manifest.provider['credentials']['username'],
             password=info.manifest.provider['credentials']['password'],
-            identity_domain=info.manifest.provider['credentials']['identity-domain'],
+            identity_domain=info.manifest.provider['credentials'][
+                'identity-domain'],
             container=info.manifest.provider['container'],
         )
         # Try to fetch the token, so it will fail early if the credentials are wrong

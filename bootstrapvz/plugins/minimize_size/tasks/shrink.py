@@ -30,7 +30,8 @@ class Zerofree(Task):
 
     @classmethod
     def run(cls, info):
-        log_check_call(['zerofree', info.volume.partition_map.root.device_path])
+        log_check_call(
+            ['zerofree', info.volume.partition_map.root.device_path])
 
 
 class ShrinkVolume(Task):
@@ -41,5 +42,6 @@ class ShrinkVolume(Task):
     @classmethod
     def run(cls, info):
         perm = os.stat(info.volume.image_path).st_mode & 0777
-        log_check_call(['/usr/bin/vmware-vdiskmanager', '-k', info.volume.image_path])
+        log_check_call(
+            ['/usr/bin/vmware-vdiskmanager', '-k', info.volume.image_path])
         os.chmod(info.volume.image_path, perm)

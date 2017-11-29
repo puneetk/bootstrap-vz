@@ -9,16 +9,48 @@ class BasePartition(AbstractPartition):
 
     # Override the states of the abstract partition
     # A real partition can be mapped and unmapped
-    events = [{'name': 'create', 'src': 'nonexistent', 'dst': 'unmapped'},
-              {'name': 'map', 'src': 'unmapped', 'dst': 'mapped'},
-              {'name': 'format', 'src': 'mapped', 'dst': 'formatted'},
-              {'name': 'mount', 'src': 'formatted', 'dst': 'mounted'},
-              {'name': 'unmount', 'src': 'mounted', 'dst': 'formatted'},
-              {'name': 'unmap', 'src': 'formatted', 'dst': 'unmapped_fmt'},
-
-              {'name': 'map', 'src': 'unmapped_fmt', 'dst': 'formatted'},
-              {'name': 'unmap', 'src': 'mapped', 'dst': 'unmapped'},
-              ]
+    events = [
+        {
+            'name': 'create',
+            'src': 'nonexistent',
+            'dst': 'unmapped'
+        },
+        {
+            'name': 'map',
+            'src': 'unmapped',
+            'dst': 'mapped'
+        },
+        {
+            'name': 'format',
+            'src': 'mapped',
+            'dst': 'formatted'
+        },
+        {
+            'name': 'mount',
+            'src': 'formatted',
+            'dst': 'mounted'
+        },
+        {
+            'name': 'unmount',
+            'src': 'mounted',
+            'dst': 'formatted'
+        },
+        {
+            'name': 'unmap',
+            'src': 'formatted',
+            'dst': 'unmapped_fmt'
+        },
+        {
+            'name': 'map',
+            'src': 'unmapped_fmt',
+            'dst': 'formatted'
+        },
+        {
+            'name': 'unmap',
+            'src': 'mapped',
+            'dst': 'unmapped'
+        },
+    ]
 
     def __init__(self, size, filesystem, format_command, mountopts, previous):
         """
@@ -34,7 +66,8 @@ class BasePartition(AbstractPartition):
         self.flags = []
         # Path to symlink in /dev/disk/by-uuid (manually maintained by this class)
         self.disk_by_uuid_path = None
-        super(BasePartition, self).__init__(size, filesystem, format_command, mountopts)
+        super(BasePartition, self).__init__(size, filesystem, format_command,
+                                            mountopts)
 
     def create(self, volume):
         """Creates the partition
@@ -84,7 +117,8 @@ class BasePartition(AbstractPartition):
         # $GRUB_DEVICE is /dev/mapper/xvd{f,g...}# (on ec2), opposed to /dev/xvda# when booting.
         # Creating the symlink ensures that grub consistently uses
         # $GRUB_DEVICE_UUID when creating /boot/grub/grub.cfg
-        self.disk_by_uuid_path = os.path.join('/dev/disk/by-uuid', self.get_uuid())
+        self.disk_by_uuid_path = os.path.join('/dev/disk/by-uuid',
+                                              self.get_uuid())
         if not os.path.exists(self.disk_by_uuid_path):
             os.symlink(self.device_path, self.disk_by_uuid_path)
 
@@ -106,19 +140,23 @@ class BasePartition(AbstractPartition):
             fs_type = 'linux-swap'
         else:
             fs_type = 'ext2'
-        create_command = ('mkpart primary {fs_type} {start} {end}'
-                          .format(fs_type=fs_type,
-                                  start=str(self.get_start() + self.pad_start),
-                                  end=str(self.get_end() - self.pad_end)))
+        create_command = ('mkpart primary {fs_type} {start} {end}'.format(
+            fs_type=fs_type,
+            start=str(self.get_start() + self.pad_start),
+            end=str(self.get_end() - self.pad_end)))
         # Create the partition
-        log_check_call(['parted', '--script', '--align', 'none', e.volume.device_path,
-                        '--', create_command])
+        log_check_call([
+            'parted', '--script', '--align', 'none', e.volume.device_path,
+            '--', create_command
+        ])
 
         # Set any flags on the partition
         for flag in self.flags:
-            log_check_call(['parted', '--script', e.volume.device_path,
-                            '--', ('set {idx} {flag} on'
-                                   .format(idx=str(self.get_index()), flag=flag))])
+            log_check_call([
+                'parted', '--script', e.volume.device_path, '--',
+                ('set {idx} {flag} on'.format(
+                    idx=str(self.get_index()), flag=flag))
+            ])
 
     def _before_map(self, e):
         # Set the device path

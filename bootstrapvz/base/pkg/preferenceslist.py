@@ -1,5 +1,3 @@
-
-
 class PreferenceLists(object):
     """Represents a list of preferences lists for apt
     """
@@ -39,4 +37,5 @@ class Preference(object):
 
         :rtype: str
         """
-        return "Package: {package}\nPin: {pin}\nPin-Priority: {pin-priority}\n".format(**self.preference)
+        return "Package: {package}\nPin: {pin}\nPin-Priority: {pin-priority}\n".format(
+            **self.preference)

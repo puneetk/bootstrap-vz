@@ -20,12 +20,14 @@ def resolve_tasks(taskset, manifest):
         taskset.add(tasks.CheckPublicKeyFile)
         taskset.add(tasks.AdminUserPublicKey)
     elif manifest.provider['name'] == 'ec2':
-        logging.getLogger(__name__).info("The SSH key will be obtained from EC2")
+        logging.getLogger(__name__).info(
+            "The SSH key will be obtained from EC2")
         taskset.add(tasks.AdminUserPublicKeyEC2)
     elif 'password' not in manifest.plugins['admin_user']:
         logging.getLogger(__name__).warn("No SSH key and no password set")
 
-    taskset.update([tasks.AddSudoPackage,
-                    tasks.CreateAdminUser,
-                    tasks.PasswordlessSudo,
-                    ])
+    taskset.update([
+        tasks.AddSudoPackage,
+        tasks.CreateAdminUser,
+        tasks.PasswordlessSudo,
+    ])

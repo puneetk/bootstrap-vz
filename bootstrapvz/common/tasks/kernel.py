@@ -11,7 +11,10 @@ class AddDKMSPackages(Task):
     @classmethod
     def run(cls, info):
         info.packages.add('dkms')
-        kernel_pkg_arch = {'i386': '686-pae', 'amd64': 'amd64'}[info.manifest.system['architecture']]
+        kernel_pkg_arch = {
+            'i386': '686-pae',
+            'amd64': 'amd64'
+        }[info.manifest.system['architecture']]
         info.packages.add('linux-headers-' + kernel_pkg_arch)
 
 
@@ -23,7 +26,8 @@ class UpdateInitramfs(Task):
     def run(cls, info):
         from bootstrapvz.common.tools import log_check_call
         # Update initramfs (-u) for all currently installed kernel versions (-k all)
-        log_check_call(['chroot', info.root, 'update-initramfs', '-u', '-k', 'all'])
+        log_check_call(
+            ['chroot', info.root, 'update-initramfs', '-u', '-k', 'all'])
 
 
 class DetermineKernelVersion(Task):
@@ -43,9 +47,11 @@ class DetermineKernelVersion(Task):
         def get_kernel_version(vmlinuz_path):
             vmlinux_basename = os.path.basename(vmlinuz_path)
             return regexp.match(vmlinux_basename).group('version')
+
         from glob import glob
         boot = os.path.join(info.root, 'boot')
         vmlinuz_paths = glob('{boot}/vmlinuz-*'.format(boot=boot))
         kernels = map(get_kernel_version, vmlinuz_paths)
         info.kernel_version = sorted(kernels, reverse=True)[0]
-        logging.getLogger(__name__).debug('Kernel version is {version}'.format(version=info.kernel_version))
+        logging.getLogger(__name__).debug(
+            'Kernel version is {version}'.format(version=info.kernel_version))

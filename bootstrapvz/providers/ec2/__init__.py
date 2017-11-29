@@ -24,7 +24,9 @@ def validate_manifest(data, validator, error):
             if key != 'type':
                 volume_size += Bytes(partition['size'])
         if int(volume_size % Bytes('1GiB')) != 0:
-            msg = ('The volume size must be a multiple of 1GiB when using EBS backing')
+            msg = (
+                'The volume size must be a multiple of 1GiB when using EBS backing'
+            )
             error(msg, ['volume', 'partitions'])
     else:
         validator(data, rel_path(__file__, 'manifest-schema-s3.yml'))
@@ -33,19 +35,25 @@ def validate_manifest(data, validator, error):
     virtualization = data['provider']['virtualization']
     backing = data['volume']['backing']
     partition_type = data['volume']['partitions']['type']
-    enhanced_networking = data['provider']['enhanced_networking'] if 'enhanced_networking' in data['provider'] else None
+    enhanced_networking = data['provider'][
+        'enhanced_networking'] if 'enhanced_networking' in data[
+            'provider'] else None
 
     if virtualization == 'pvm' and bootloader != 'pvgrub':
-        error('Paravirtualized AMIs only support pvgrub as a bootloader', ['system', 'bootloader'])
+        error('Paravirtualized AMIs only support pvgrub as a bootloader',
+              ['system', 'bootloader'])
 
     if backing != 'ebs' and virtualization == 'hvm':
-            error('HVM AMIs currently only work when they are EBS backed', ['volume', 'backing'])
+        error('HVM AMIs currently only work when they are EBS backed',
+              ['volume', 'backing'])
 
     if backing == 's3' and partition_type != 'none':
-            error('S3 backed AMIs currently only work with unpartitioned volumes', ['system', 'bootloader'])
+        error('S3 backed AMIs currently only work with unpartitioned volumes',
+              ['system', 'bootloader'])
 
     if enhanced_networking == 'simple' and virtualization != 'hvm':
-            error('Enhanced networking only works with HVM virtualization', ['provider', 'virtualization'])
+        error('Enhanced networking only works with HVM virtualization',
+              ['provider', 'virtualization'])
 
 
 def resolve_tasks(taskset, manifest):
@@ -57,28 +65,29 @@ def resolve_tasks(taskset, manifest):
     taskset.update(task_groups.get_standard_groups(manifest))
     taskset.update(task_groups.ssh_group)
 
-    taskset.update([tasks.host.AddExternalCommands,
-                    tasks.packages.DefaultPackages,
-                    tasks.connection.SilenceBotoDebug,
-                    tasks.connection.GetCredentials,
-                    tasks.ami.AMIName,
-                    tasks.connection.Connect,
-
-                    tasks.tuning.TuneSystem,
-                    tasks.tuning.BlackListModules,
-                    boot.BlackListModules,
-                    boot.DisableGetTTYs,
-                    tasks.boot.AddXenGrubConsoleOutputDevice,
-                    grub.WriteGrubConfig,
-                    tasks.boot.UpdateGrubConfig,
-                    initd.AddExpandRoot,
-                    initd.RemoveHWClock,
-                    initd.InstallInitScripts,
-                    tasks.ami.RegisterAMI,
-                    ])
+    taskset.update([
+        tasks.host.AddExternalCommands,
+        tasks.packages.DefaultPackages,
+        tasks.connection.SilenceBotoDebug,
+        tasks.connection.GetCredentials,
+        tasks.ami.AMIName,
+        tasks.connection.Connect,
+        tasks.tuning.TuneSystem,
+        tasks.tuning.BlackListModules,
+        boot.BlackListModules,
+        boot.DisableGetTTYs,
+        tasks.boot.AddXenGrubConsoleOutputDevice,
+        grub.WriteGrubConfig,
+        tasks.boot.UpdateGrubConfig,
+        initd.AddExpandRoot,
+        initd.RemoveHWClock,
+        initd.InstallInitScripts,
+        tasks.ami.RegisterAMI,
+    ])
 
     if manifest.release > wheezy:
-        taskset.add(tasks.network.InstallNetworkingUDevHotplugAndDHCPSubinterface)
+        taskset.add(
+            tasks.network.InstallNetworkingUDevHotplugAndDHCPSubinterface)
 
     if manifest.release <= wheezy:
         # The default DHCP client `isc-dhcp' doesn't work properly on wheezy and earlier
@@ -101,46 +110,46 @@ def resolve_tasks(taskset, manifest):
 
     if manifest.system['bootloader'] == 'pvgrub':
         taskset.add(grub.AddGrubPackage)
-        taskset.update([grub.AddGrubPackage,
-                        grub.InitGrubConfig,
-                        grub.SetGrubTerminalToConsole,
-                        grub.SetGrubConsolOutputDeviceToSerial,
-                        grub.RemoveGrubTimeout,
-                        grub.DisableGrubRecovery,
-                        tasks.boot.CreatePVGrubCustomRule,
-                        tasks.boot.ConfigurePVGrub,
-                        grub.WriteGrubConfig,
-                        tasks.boot.UpdateGrubConfig,
-                        tasks.boot.LinkGrubConfig])
+        taskset.update([
+            grub.AddGrubPackage, grub.InitGrubConfig,
+            grub.SetGrubTerminalToConsole,
+            grub.SetGrubConsolOutputDeviceToSerial, grub.RemoveGrubTimeout,
+            grub.DisableGrubRecovery, tasks.boot.CreatePVGrubCustomRule,
+            tasks.boot.ConfigurePVGrub, grub.WriteGrubConfig,
+            tasks.boot.UpdateGrubConfig, tasks.boot.LinkGrubConfig
+        ])
 
     if manifest.volume['backing'].lower() == 'ebs':
-        taskset.update([tasks.host.GetInstanceMetadata,
-                        tasks.ebs.Create,
-                        tasks.ebs.Snapshot,
-                        ])
+        taskset.update([
+            tasks.host.GetInstanceMetadata,
+            tasks.ebs.Create,
+            tasks.ebs.Snapshot,
+        ])
         taskset.add(tasks.ebs.Attach)
         taskset.discard(volume.Attach)
 
     if manifest.volume['backing'].lower() == 's3':
-        taskset.update([loopback.AddRequiredCommands,
-                        tasks.host.SetRegion,
-                        loopback.Create,
-                        tasks.filesystem.S3FStab,
-                        tasks.ami.BundleImage,
-                        tasks.ami.UploadImage,
-                        tasks.ami.RemoveBundle,
-                        ])
+        taskset.update([
+            loopback.AddRequiredCommands,
+            tasks.host.SetRegion,
+            loopback.Create,
+            tasks.filesystem.S3FStab,
+            tasks.ami.BundleImage,
+            tasks.ami.UploadImage,
+            tasks.ami.RemoveBundle,
+        ])
         taskset.discard(filesystem.FStab)
 
     if manifest.provider.get('enhanced_networking', None) == 'simple':
-        taskset.update([kernel.AddDKMSPackages,
-                        tasks.network.InstallEnhancedNetworking,
-                        tasks.network.InstallENANetworking,
-                        kernel.UpdateInitramfs])
+        taskset.update([
+            kernel.AddDKMSPackages, tasks.network.InstallEnhancedNetworking,
+            tasks.network.InstallENANetworking, kernel.UpdateInitramfs
+        ])
 
-    taskset.update([filesystem.Format,
-                    volume.Delete,
-                    ])
+    taskset.update([
+        filesystem.Format,
+        volume.Delete,
+    ])
 
 
 def resolve_rollback_tasks(taskset, manifest, completed, counter_task):

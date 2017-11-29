@@ -15,8 +15,12 @@ class AddGoogleCloudRepoKey(Task):
     @classmethod
     def run(cls, info):
         key_file = os.path.join(info.root, 'google.gpg.key')
-        log_check_call(['wget', 'https://packages.cloud.google.com/apt/doc/apt-key.gpg', '-O', key_file])
-        log_check_call(['chroot', info.root, 'apt-key', 'add', 'google.gpg.key'])
+        log_check_call([
+            'wget', 'https://packages.cloud.google.com/apt/doc/apt-key.gpg',
+            '-O', key_file
+        ])
+        log_check_call(
+            ['chroot', info.root, 'apt-key', 'add', 'google.gpg.key'])
         os.remove(key_file)
 
 
@@ -27,7 +31,10 @@ class AddGoogleCloudRepoKeyringRepo(Task):
 
     @classmethod
     def run(cls, info):
-        info.source_lists.add('google-cloud', 'deb http://packages.cloud.google.com/apt google-cloud-packages-archive-keyring-{system.release} main')
+        info.source_lists.add(
+            'google-cloud',
+            'deb http://packages.cloud.google.com/apt google-cloud-packages-archive-keyring-{system.release} main'
+        )
 
 
 class InstallGoogleCloudRepoKeyringPackage(Task):

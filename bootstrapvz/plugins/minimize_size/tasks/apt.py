@@ -16,8 +16,9 @@ class AutomateAptClean(Task):
 
     @classmethod
     def run(cls, info):
-        shutil.copy(os.path.join(assets, 'apt-clean'),
-                    os.path.join(info.root, 'etc/apt/apt.conf.d/90clean'))
+        shutil.copy(
+            os.path.join(assets, 'apt-clean'),
+            os.path.join(info.root, 'etc/apt/apt.conf.d/90clean'))
 
 
 class FilterTranslationFiles(Task):
@@ -45,8 +46,9 @@ class AptGzipIndexes(Task):
 
     @classmethod
     def run(cls, info):
-        shutil.copy(os.path.join(assets, 'apt-gzip-indexes'),
-                    os.path.join(info.root, 'etc/apt/apt.conf.d/20gzip-indexes'))
+        shutil.copy(
+            os.path.join(assets, 'apt-gzip-indexes'),
+            os.path.join(info.root, 'etc/apt/apt.conf.d/20gzip-indexes'))
 
 
 class AptAutoremoveSuggests(Task):
@@ -58,5 +60,7 @@ class AptAutoremoveSuggests(Task):
 
     @classmethod
     def run(cls, info):
-        shutil.copy(os.path.join(assets, 'apt-autoremove-suggests'),
-                    os.path.join(info.root, 'etc/apt/apt.conf.d/20autoremove-suggests'))
+        shutil.copy(
+            os.path.join(assets, 'apt-autoremove-suggests'),
+            os.path.join(info.root,
+                         'etc/apt/apt.conf.d/20autoremove-suggests'))

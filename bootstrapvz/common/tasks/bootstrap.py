@@ -19,7 +19,8 @@ class AddRequiredCommands(Task):
 
 def get_bootstrap_args(info):
     executable = ['debootstrap']
-    arch = info.manifest.system.get('userspace_architecture', info.manifest.system.get('architecture'))
+    arch = info.manifest.system.get('userspace_architecture',
+                                    info.manifest.system.get('architecture'))
     options = ['--arch=' + arch]
     if 'variant' in info.manifest.bootstrapper:
         options.append('--variant=' + info.manifest.bootstrapper['variant'])
@@ -39,7 +40,8 @@ def get_tarball_filename(info):
     hash_args = [arg for arg in arguments if arg != info.root]
     tarball_id = sha1(repr(frozenset(options + hash_args))).hexdigest()[0:8]
     tarball_filename = 'debootstrap-' + tarball_id + '.tar'
-    return os.path.join(info.manifest.bootstrapper['workspace'], tarball_filename)
+    return os.path.join(info.manifest.bootstrapper['workspace'],
+                        tarball_filename)
 
 
 class MakeTarball(Task):
@@ -54,9 +56,12 @@ class MakeTarball(Task):
             log.debug('Found matching tarball, skipping creation')
         else:
             from ..tools import log_call
-            status, out, err = log_call(executable + options + ['--make-tarball=' + tarball] + arguments)
+            status, out, err = log_call(
+                executable + options + ['--make-tarball=' + tarball] +
+                arguments)
             if status not in [0, 1]:  # variant=minbase exits with 0
-                msg = 'debootstrap exited with status {status}, it should exit with status 0 or 1'.format(status=status)
+                msg = 'debootstrap exited with status {status}, it should exit with status 0 or 1'.format(
+                    status=status)
                 raise TaskError(msg)
 
 
@@ -99,8 +104,7 @@ class IncludePackagesInBootstrap(Task):
     @classmethod
     def run(cls, info):
         info.include_packages.update(
-            set(info.manifest.bootstrapper['include_packages'])
-        )
+            set(info.manifest.bootstrapper['include_packages']))
 
 
 class ExcludePackagesInBootstrap(Task):
@@ -110,5 +114,4 @@ class ExcludePackagesInBootstrap(Task):
     @classmethod
     def run(cls, info):
         info.exclude_packages.update(
-            set(info.manifest.bootstrapper['exclude_packages'])
-        )
+            set(info.manifest.bootstrapper['exclude_packages']))

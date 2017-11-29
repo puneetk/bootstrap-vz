@@ -70,12 +70,15 @@ class SetMetadataSource(Task):
             source_mapping = {'ec2': 'Ec2'}
             sources = source_mapping.get(info.manifest.provider['name'], None)
             if sources is None:
-                msg = ('No cloud-init metadata source mapping found for provider `{provider}\', '
-                       'skipping selections setting.').format(provider=info.manifest.provider['name'])
+                msg = (
+                    'No cloud-init metadata source mapping found for provider `{provider}\', '
+                    'skipping selections setting.'
+                ).format(provider=info.manifest.provider['name'])
                 logging.getLogger(__name__).warn(msg)
                 return
         sources = "cloud-init    cloud-init/datasources    multiselect    " + sources
-        log_check_call(['chroot', info.root, 'debconf-set-selections'], sources)
+        log_check_call(['chroot', info.root, 'debconf-set-selections'],
+                       sources)
 
 
 class DisableModules(Task):
@@ -112,7 +115,8 @@ class EnableModules(Task):
         cloud_cfg = os.path.join(info.root, 'etc/cloud/cloud.cfg')
         for section in info.manifest.plugins['cloud_init']['enable_modules']:
             regex = re.compile("^%s:" % section)
-            for entry in info.manifest.plugins['cloud_init']['enable_modules'][section]:
+            for entry in info.manifest.plugins['cloud_init']['enable_modules'][
+                    section]:
                 count = 0
                 counting = 0
                 for line in fileinput.input(files=cloud_cfg, inplace=True):
@@ -132,6 +136,7 @@ class SetCloudInitMountOptions(Task):
     @classmethod
     def run(cls, info):
         cloud_init_src = os.path.join(assets, 'cloud-init/debian_cloud.cfg')
-        cloud_init_dst = os.path.join(info.root, 'etc/cloud/cloud.cfg.d/01_debian_cloud.cfg')
+        cloud_init_dst = os.path.join(
+            info.root, 'etc/cloud/cloud.cfg.d/01_debian_cloud.cfg')
         copy(cloud_init_src, cloud_init_dst)
         os.chmod(cloud_init_dst, 0644)

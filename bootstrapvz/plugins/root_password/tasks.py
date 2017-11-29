@@ -9,5 +9,6 @@ class SetRootPassword(Task):
     @classmethod
     def run(cls, info):
         from bootstrapvz.common.tools import log_check_call
-        log_check_call(['chroot', info.root, 'chpasswd'],
-                       'root:' + info.manifest.plugins['root_password']['password'])
+        log_check_call(
+            ['chroot', info.root, 'chpasswd'],
+            'root:' + info.manifest.plugins['root_password']['password'])

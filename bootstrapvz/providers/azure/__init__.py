@@ -16,19 +16,20 @@ def validate_manifest(data, validator, error):
 
 def resolve_tasks(taskset, manifest):
     taskset.update(task_groups.get_standard_groups(manifest))
-    taskset.update([apt.AddBackports,
-                    tasks.packages.DefaultPackages,
-                    loopback.AddRequiredCommands,
-                    loopback.Create,
-                    image.MoveImage,
-                    initd.InstallInitScripts,
-                    ssh.AddOpenSSHPackage,
-                    ssh.ShredHostkeys,
-                    ssh.AddSSHKeyGeneration,
-                    tasks.packages.Waagent,
-                    tasks.boot.ConfigureGrub,
-                    tasks.boot.PatchUdev,
-                    ])
+    taskset.update([
+        apt.AddBackports,
+        tasks.packages.DefaultPackages,
+        loopback.AddRequiredCommands,
+        loopback.Create,
+        image.MoveImage,
+        initd.InstallInitScripts,
+        ssh.AddOpenSSHPackage,
+        ssh.ShredHostkeys,
+        ssh.AddSSHKeyGeneration,
+        tasks.packages.Waagent,
+        tasks.boot.ConfigureGrub,
+        tasks.boot.PatchUdev,
+    ])
     taskset.discard(grub.SetGrubConsolOutputDeviceToSerial)
 
 

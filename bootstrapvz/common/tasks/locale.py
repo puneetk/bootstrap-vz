@@ -23,18 +23,19 @@ class GenerateLocale(Task):
         from ..tools import sed_i
         from ..tools import log_check_call
 
-        lang = '{locale}.{charmap}'.format(locale=info.manifest.system['locale'],
-                                           charmap=info.manifest.system['charmap'])
-        locale_str = '{locale}.{charmap} {charmap}'.format(locale=info.manifest.system['locale'],
-                                                           charmap=info.manifest.system['charmap'])
+        lang = '{locale}.{charmap}'.format(
+            locale=info.manifest.system['locale'],
+            charmap=info.manifest.system['charmap'])
+        locale_str = '{locale}.{charmap} {charmap}'.format(
+            locale=info.manifest.system['locale'],
+            charmap=info.manifest.system['charmap'])
 
         search = '# ' + locale_str
         locale_gen = os.path.join(info.root, 'etc/locale.gen')
         sed_i(locale_gen, search, locale_str)
 
         log_check_call(['chroot', info.root, 'locale-gen'])
-        log_check_call(['chroot', info.root,
-                        'update-locale', 'LANG=' + lang])
+        log_check_call(['chroot', info.root, 'update-locale', 'LANG=' + lang])
 
 
 class SetTimezone(Task):
@@ -58,7 +59,8 @@ class SetLocalTimeLink(Task):
         timezone = info.manifest.system['timezone']
         localtime_path = os.path.join(info.root, 'etc/localtime')
         os.unlink(localtime_path)
-        os.symlink(os.path.join('/usr/share/zoneinfo', timezone), localtime_path)
+        os.symlink(
+            os.path.join('/usr/share/zoneinfo', timezone), localtime_path)
 
 
 class SetLocalTimeCopy(Task):
@@ -69,6 +71,7 @@ class SetLocalTimeCopy(Task):
     def run(cls, info):
         from shutil import copy
         timezone = info.manifest.system['timezone']
-        zoneinfo_path = os.path.join(info.root, '/usr/share/zoneinfo', timezone)
+        zoneinfo_path = os.path.join(info.root, '/usr/share/zoneinfo',
+                                     timezone)
         localtime_path = os.path.join(info.root, 'etc/localtime')
         copy(zoneinfo_path, localtime_path)

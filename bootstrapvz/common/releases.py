@@ -1,5 +1,3 @@
-
-
 class _Release(object):
     def __init__(self, codename, version):
         self.codename = codename
@@ -25,7 +23,8 @@ class _ReleaseAlias(_Release):
     def __init__(self, alias, release):
         self.alias = alias
         self.release = release
-        super(_ReleaseAlias, self).__init__(self.release.codename, self.release.version)
+        super(_ReleaseAlias, self).__init__(self.release.codename,
+                                            self.release.version)
 
     def __str__(self):
         return self.alias
@@ -61,7 +60,8 @@ def get_release(release_name):
     from . import releases
     release = getattr(releases, release_name, None)
     if release is None or not isinstance(release, _Release):
-        raise UnknownReleaseException('The release `{name}\' is unknown'.format(name=release))
+        raise UnknownReleaseException(
+            'The release `{name}\' is unknown'.format(name=release))
     return release
 
 

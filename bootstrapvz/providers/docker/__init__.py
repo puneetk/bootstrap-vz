@@ -12,11 +12,12 @@ def validate_manifest(data, validator, error):
 
 def resolve_tasks(taskset, manifest):
     taskset.update(task_groups.get_base_group(manifest))
-    taskset.update([folder.Create,
-                    filesystem.CopyMountTable,
-                    filesystem.RemoveMountTable,
-                    folder.Delete,
-                    ])
+    taskset.update([
+        folder.Create,
+        filesystem.CopyMountTable,
+        filesystem.RemoveMountTable,
+        folder.Delete,
+    ])
     taskset.update(task_groups.get_network_group(manifest))
     taskset.update(task_groups.get_apt_group(manifest))
     taskset.update(task_groups.get_locale_group(manifest))
@@ -26,10 +27,11 @@ def resolve_tasks(taskset, manifest):
     # Let the autostart of daemons by apt remain disabled
     taskset.discard(apt.EnableDaemonAutostart)
 
-    taskset.update([tasks.commands.AddRequiredCommands,
-                    tasks.image.CreateDockerfileEntry,
-                    tasks.image.CreateImage,
-                    ])
+    taskset.update([
+        tasks.commands.AddRequiredCommands,
+        tasks.image.CreateDockerfileEntry,
+        tasks.image.CreateImage,
+    ])
     if 'labels' in manifest.provider:
         taskset.add(tasks.image.PopulateLabels)
     if 'dockerfile' in manifest.provider:

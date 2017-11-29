@@ -1,5 +1,3 @@
-
-
 def load_volume(data, bootloader):
     """Instantiates a volume that corresponds to the data in the manifest
 
@@ -13,10 +11,11 @@ def load_volume(data, bootloader):
     from partitionmaps.gpt import GPTPartitionMap
     from partitionmaps.msdos import MSDOSPartitionMap
     from partitionmaps.none import NoPartitions
-    partition_map = {'none': NoPartitions,
-                     'gpt': GPTPartitionMap,
-                     'msdos': MSDOSPartitionMap,
-                     }.get(data['partitions']['type'])
+    partition_map = {
+        'none': NoPartitions,
+        'gpt': GPTPartitionMap,
+        'msdos': MSDOSPartitionMap,
+    }.get(data['partitions']['type'])
 
     # Map valid volume backings in the manifest and their corresponding classes
     from bootstrapvz.common.fs.loopbackvolume import LoopbackVolume
@@ -27,16 +26,17 @@ def load_volume(data, bootloader):
     from bootstrapvz.common.fs.folder import Folder
     from bootstrapvz.common.fs.logicalvolume import LogicalVolume
     from bootstrapvz.common.fs.qcow2volume import Qcow2Volume
-    volume_backing = {'raw': LoopbackVolume,
-                      's3':  LoopbackVolume,
-                      'vdi': VirtualDiskImage,
-                      'vhd': VirtualHardDisk,
-                      'vmdk': VirtualMachineDisk,
-                      'ebs': EBSVolume,
-                      'folder': Folder,
-                      'lvm': LogicalVolume,
-                      'qcow2': Qcow2Volume
-                      }.get(data['backing'])
+    volume_backing = {
+        'raw': LoopbackVolume,
+        's3': LoopbackVolume,
+        'vdi': VirtualDiskImage,
+        'vhd': VirtualHardDisk,
+        'vmdk': VirtualMachineDisk,
+        'ebs': EBSVolume,
+        'folder': Folder,
+        'lvm': LogicalVolume,
+        'qcow2': Qcow2Volume
+    }.get(data['backing'])
 
     # Instantiate the partition map
     from bootstrapvz.common.bytes import Bytes

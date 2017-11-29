@@ -27,10 +27,14 @@ def log_call(command, stdin=None, env=None, shell=False, cwd=None):
     else:
         log.debug('Executing: {command}'.format(command=command))
 
-    process = subprocess.Popen(args=command, env=env, shell=shell, cwd=cwd,
-                               stdin=subprocess.PIPE,
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.PIPE)
+    process = subprocess.Popen(
+        args=command,
+        env=env,
+        shell=shell,
+        cwd=cwd,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
 
     if stdin is not None:
         log.debug('  stdin: ' + stdin)
@@ -49,8 +53,7 @@ def log_call(command, stdin=None, env=None, shell=False, cwd=None):
         log.error(line)
         stderr.append(line)
 
-    handlers = {process.stdout: handle_stdout,
-                process.stderr: handle_stderr}
+    handlers = {process.stdout: handle_stdout, process.stderr: handle_stderr}
 
     def stream_readline(stream):
         for line in iter(stream.readline, ''):
@@ -69,9 +72,11 @@ def sed_i(file_path, pattern, subst, expected_replacements=1):
     if replacement_count != expected_replacements:
         from exceptions import UnexpectedNumMatchesError
         msg = ('There were {real} instead of {expected} matches for '
-               'the expression `{exp}\' in the file `{path}\''
-               .format(real=replacement_count, expected=expected_replacements,
-                       exp=pattern, path=file_path))
+               'the expression `{exp}\' in the file `{path}\''.format(
+                   real=replacement_count,
+                   expected=expected_replacements,
+                   exp=pattern,
+                   path=file_path))
         raise UnexpectedNumMatchesError(msg)
 
 
@@ -102,7 +107,8 @@ def load_yaml(path):
 def load_data(path):
     filename, extension = os.path.splitext(path)
     if not os.path.isfile(path):
-        raise Exception('The path {path} does not point to a file.'.format(path=path))
+        raise Exception(
+            'The path {path} does not point to a file.'.format(path=path))
     if extension == '.json':
         return load_json(path)
     elif extension == '.yml' or extension == '.yaml':
@@ -131,8 +137,9 @@ def copy_tree(from_path, to_path):
                     os.remove(full_path)
             os.mkdir(full_path)
         for path in files:
-            copy(os.path.join(abs_prefix, path),
-                 os.path.join(to_path, prefix, path))
+            copy(
+                os.path.join(abs_prefix, path),
+                os.path.join(to_path, prefix, path))
 
 
 def rel_path(base, path):

@@ -23,12 +23,15 @@ class CheckPlaybookPath(Task):
     @classmethod
     def run(cls, info):
         from bootstrapvz.common.exceptions import TaskError
-        playbook = rel_path(info.manifest.path, info.manifest.plugins['ansible']['playbook'])
+        playbook = rel_path(info.manifest.path,
+                            info.manifest.plugins['ansible']['playbook'])
         if not os.path.exists(playbook):
-            msg = 'The playbook file {playbook} does not exist.'.format(playbook=playbook)
+            msg = 'The playbook file {playbook} does not exist.'.format(
+                playbook=playbook)
             raise TaskError(msg)
         if not os.path.isfile(playbook):
-            msg = 'The playbook path {playbook} does not point to a file.'.format(playbook=playbook)
+            msg = 'The playbook path {playbook} does not point to a file.'.format(
+                playbook=playbook)
             raise TaskError(msg)
 
 
@@ -50,7 +53,8 @@ class RunAnsiblePlaybook(Task):
         from bootstrapvz.common.tools import log_check_call
 
         # Extract playbook and directory
-        playbook = rel_path(info.manifest.path, info.manifest.plugins['ansible']['playbook'])
+        playbook = rel_path(info.manifest.path,
+                            info.manifest.plugins['ansible']['playbook'])
 
         # build the inventory file
         inventory = os.path.join(info.root, 'tmp/bootstrap-inventory')
@@ -69,11 +73,18 @@ class RunAnsiblePlaybook(Task):
         # build the ansible command
         cmd = ['ansible-playbook', '-i', inventory, playbook]
         if 'extra_vars' in info.manifest.plugins['ansible']:
-            cmd.extend(['--extra-vars', json.dumps(info.manifest.plugins['ansible']['extra_vars'])])
+            cmd.extend([
+                '--extra-vars',
+                json.dumps(info.manifest.plugins['ansible']['extra_vars'])
+            ])
         if 'tags' in info.manifest.plugins['ansible']:
-            cmd.extend(['--tags', ','.join(info.manifest.plugins['ansible']['tags'])])
+            cmd.extend(
+                ['--tags', ','.join(info.manifest.plugins['ansible']['tags'])])
         if 'skip_tags' in info.manifest.plugins['ansible']:
-            cmd.extend(['--skip-tags', ','.join(info.manifest.plugins['ansible']['skip_tags'])])
+            cmd.extend([
+                '--skip-tags',
+                ','.join(info.manifest.plugins['ansible']['skip_tags'])
+            ])
         if 'opt_flags' in info.manifest.plugins['ansible']:
             # Should probably do proper validation on these, but I don't think it should be used very often.
             cmd.extend(info.manifest.plugins['ansible']['opt_flags'])

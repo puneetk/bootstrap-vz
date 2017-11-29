@@ -1,14 +1,24 @@
 *.pyc
+*.pyo
+__pycache__/
+
 # Jekyll-generated files
 /Gemfile.lock
 /_site/
+
 # When developing for ec2 `vagrant provision' is quite handy
 /Vagrantfile
 /.vagrant/
+
 # Building the package
 /build/
 /dist/
 /bootstrap_vz.egg-info/
+
+# Tox related
+.tox/
+.tox_output
+
 # Testing
 /.coverage
 /.tox/

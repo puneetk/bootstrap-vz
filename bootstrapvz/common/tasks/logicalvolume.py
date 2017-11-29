@@ -24,8 +24,9 @@ class Create(Task):
 
     @classmethod
     def run(cls, info):
-        info.volume.create(volumegroup=info.manifest.volume['volumegroup'],
-                           logicalvolume=info.manifest.volume['logicalvolume'])
+        info.volume.create(
+            volumegroup=info.manifest.volume['volumegroup'],
+            logicalvolume=info.manifest.volume['logicalvolume'])
 
 
 class Delete(Task):

@@ -41,9 +41,8 @@ def main():
 
     # Everything has been set up, connect to the server and begin the bootstrapping process
     with build_server.connect() as connection:
-        connection.run(manifest,
-                       debug=opts['--debug'],
-                       dry_run=opts['--dry-run'])
+        connection.run(
+            manifest, debug=opts['--debug'], dry_run=opts['--dry-run'])
 
 
 def get_opts():

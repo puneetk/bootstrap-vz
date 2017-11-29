@@ -15,24 +15,25 @@ def validate_manifest(data, validator, error):
 
 def resolve_tasks(taskset, manifest):
     taskset.update(task_groups.get_standard_groups(manifest))
-    taskset.update([apt.AddBackports,
-                    apt.AddDefaultSources,
-                    loopback.AddRequiredCommands,
-                    loopback.Create,
-                    tasks.packages.DefaultPackages,
-                    tasks.configuration.GatherReleaseInformation,
-                    tasks.boot.ConfigureGrub,
-                    initd.InstallInitScripts,
-                    boot.BlackListModules,
-                    boot.UpdateInitramfs,
-                    ssh.AddSSHKeyGeneration,
-                    ssh.DisableSSHPasswordAuthentication,
-                    ssh.DisableRootLogin,
-                    tasks.apt.AddBaselineAptCache,
-                    image.MoveImage,
-                    tasks.image.CreateTarball,
-                    volume.Delete,
-                    ])
+    taskset.update([
+        apt.AddBackports,
+        apt.AddDefaultSources,
+        loopback.AddRequiredCommands,
+        loopback.Create,
+        tasks.packages.DefaultPackages,
+        tasks.configuration.GatherReleaseInformation,
+        tasks.boot.ConfigureGrub,
+        initd.InstallInitScripts,
+        boot.BlackListModules,
+        boot.UpdateInitramfs,
+        ssh.AddSSHKeyGeneration,
+        ssh.DisableSSHPasswordAuthentication,
+        ssh.DisableRootLogin,
+        tasks.apt.AddBaselineAptCache,
+        image.MoveImage,
+        tasks.image.CreateTarball,
+        volume.Delete,
+    ])
     taskset.discard(grub.SetGrubConsolOutputDeviceToSerial)
 
     if 'gcs_destination' in manifest.provider:

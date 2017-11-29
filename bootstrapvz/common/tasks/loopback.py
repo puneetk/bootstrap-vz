@@ -28,5 +28,6 @@ class Create(Task):
     @classmethod
     def run(cls, info):
         import os.path
-        image_path = os.path.join(info.workspace, 'volume.' + info.volume.extension)
+        image_path = os.path.join(info.workspace,
+                                  'volume.' + info.volume.extension)
         info.volume.create(image_path)

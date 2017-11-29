@@ -7,7 +7,9 @@ from ..tools import log_check_call
 class AddManifestPackages(Task):
     description = 'Adding packages from the manifest'
     phase = phases.preparation
-    predecessors = [apt.AddManifestSources, apt.AddDefaultSources, apt.AddBackports]
+    predecessors = [
+        apt.AddManifestSources, apt.AddDefaultSources, apt.AddBackports
+    ]
 
     @classmethod
     def run(cls, info):
@@ -29,11 +31,14 @@ class InstallPackages(Task):
     @classmethod
     def run(cls, info):
         batch = []
-        actions = {info.packages.Remote: cls.install_remote,
-                   info.packages.Local: cls.install_local}
+        actions = {
+            info.packages.Remote: cls.install_remote,
+            info.packages.Local: cls.install_local
+        }
         for i, package in enumerate(info.packages.install):
             batch.append(package)
-            next_package = info.packages.install[i + 1] if i + 1 < len(info.packages.install) else None
+            next_package = info.packages.install[i + 1] if i + 1 < len(
+                info.packages.install) else None
             if next_package is None or package.__class__ is not next_package.__class__:
                 actions[package.__class__](info, batch)
                 batch = []
@@ -46,12 +51,12 @@ class InstallPackages(Task):
         try:
             env = os.environ.copy()
             env['DEBIAN_FRONTEND'] = 'noninteractive'
-            log_check_call(['chroot', info.root,
-                            'apt-get', 'install',
-                                       '--no-install-recommends',
-                                       '--assume-yes'] +
-                           map(str, remote_packages),
-                           env=env)
+            log_check_call(
+                [
+                    'chroot', info.root, 'apt-get', 'install',
+                    '--no-install-recommends', '--assume-yes'
+                ] + map(str, remote_packages),
+                env=env)
         except CalledProcessError as e:
             import logging
             disk_stat = os.statvfs(info.root)
@@ -62,13 +67,15 @@ class InstallPackages(Task):
             if free_mb < 50:
                 msg = ('apt exited with a non-zero status, '
                        'this may be because\nthe image volume is '
-                       'running out of disk space ({free}MB left)').format(free=free_mb)
+                       'running out of disk space ({free}MB left)'
+                       ).format(free=free_mb)
                 logging.getLogger(__name__).warn(msg)
             else:
                 if e.returncode == 100:
-                    msg = ('apt exited with status code 100. '
-                           'This can sometimes occur when package retrieval times out or a package extraction failed. '
-                           'apt might succeed if you try bootstrapping again.')
+                    msg = (
+                        'apt exited with status code 100. '
+                        'This can sometimes occur when package retrieval times out or a package extraction failed. '
+                        'apt might succeed if you try bootstrapping again.')
                     logging.getLogger(__name__).warn(msg)
             raise
 
@@ -90,9 +97,10 @@ class InstallPackages(Task):
 
         env = os.environ.copy()
         env['DEBIAN_FRONTEND'] = 'noninteractive'
-        log_check_call(['chroot', info.root,
-                        'dpkg', '--install'] + chrooted_package_paths,
-                       env=env)
+        log_check_call(
+            ['chroot', info.root, 'dpkg', '--install'] +
+            chrooted_package_paths,
+            env=env)
 
         for path in absolute_package_paths:
             os.remove(path)
@@ -106,6 +114,7 @@ class AddTaskselStandardPackages(Task):
 
     @classmethod
     def run(cls, info):
-        tasksel_packages = log_check_call(['chroot', info.root, 'tasksel', '--task-packages', 'standard'])
+        tasksel_packages = log_check_call(
+            ['chroot', info.root, 'tasksel', '--task-packages', 'standard'])
         for pkg in tasksel_packages:
             info.packages.add(pkg)

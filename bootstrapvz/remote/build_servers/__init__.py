@@ -1,5 +1,3 @@
-
-
 def pick_build_server(build_servers, manifest, preferences={}):
     # Validate the build servers list
     from bootstrapvz.common.tools import load_data, rel_path
@@ -16,7 +14,8 @@ def pick_build_server(build_servers, manifest, preferences={}):
     def matches(name, settings):
         if preferences.get('name', name) != name:
             return False
-        if preferences.get('release', settings['release']) != settings['release']:
+        if preferences.get('release',
+                           settings['release']) != settings['release']:
             return False
         if must_bootstrap not in settings['can_bootstrap']:
             return False
@@ -31,7 +30,8 @@ def pick_build_server(build_servers, manifest, preferences={}):
         else:
             from remote import RemoteBuildServer
             return RemoteBuildServer(name, settings)
-    raise Exception('Unable to find a build server that matches your preferences.')
+    raise Exception(
+        'Unable to find a build server that matches your preferences.')
 
 
 def getNPorts(n, port_range=(1024, 65535)):

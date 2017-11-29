@@ -29,7 +29,8 @@ class GPTPartitionMap(AbstractPartitionMap):
             # primary gpt + grub = 1024KiB
             # The 1 MiB will be subtracted later on, once we know what the subsequent partition is
             from ..partitions.unformatted import UnformattedPartition
-            self.grub_boot = UnformattedPartition(Sectors('1MiB', sector_size), last_partition())
+            self.grub_boot = UnformattedPartition(
+                Sectors('1MiB', sector_size), last_partition())
             self.partitions.append(self.grub_boot)
 
         # Offset all partitions by 1 sector.
@@ -39,9 +40,11 @@ class GPTPartitionMap(AbstractPartitionMap):
 
         # The boot and swap partitions are optional
         if 'boot' in data:
-            self.boot = GPTPartition(Sectors(data['boot']['size'], sector_size),
-                                     data['boot']['filesystem'], data['boot'].get('format_command', None),
-                                     data['boot'].get('mountopts', None), 'boot', last_partition())
+            self.boot = GPTPartition(
+                Sectors(data['boot']['size'], sector_size),
+                data['boot']['filesystem'], data['boot'].get(
+                    'format_command', None), data['boot'].get(
+                        'mountopts', None), 'boot', last_partition())
             if self.boot.previous is not None:
                 # No need to pad if this is the first partition
                 self.boot.pad_start += partition_gap
@@ -49,15 +52,18 @@ class GPTPartitionMap(AbstractPartitionMap):
             self.partitions.append(self.boot)
 
         if 'swap' in data:
-            self.swap = GPTSwapPartition(Sectors(data['swap']['size'], sector_size), last_partition())
+            self.swap = GPTSwapPartition(
+                Sectors(data['swap']['size'], sector_size), last_partition())
             if self.swap.previous is not None:
                 self.swap.pad_start += partition_gap
                 self.swap.size -= partition_gap
             self.partitions.append(self.swap)
 
-        self.root = GPTPartition(Sectors(data['root']['size'], sector_size),
-                                 data['root']['filesystem'], data['root'].get('format_command', None),
-                                 data['root'].get('mountopts', None), 'root', last_partition())
+        self.root = GPTPartition(
+            Sectors(data['root']['size'],
+                    sector_size), data['root']['filesystem'], data['root'].get(
+                        'format_command', None), data['root'].get(
+                            'mountopts', None), 'root', last_partition())
         if self.root.previous is not None:
             self.root.pad_start += partition_gap
             self.root.size -= partition_gap
@@ -66,9 +72,11 @@ class GPTPartitionMap(AbstractPartitionMap):
         # Create all additional partitions
         for partition in data:
             if partition not in ["boot", "swap", "root", "type"] and not None:
-                part_tmp = GPTPartition(Sectors(data[partition]['size'], sector_size),
-                                        data[partition]['filesystem'], data[partition].get('format_command', None),
-                                        data[partition].get('mountopts', None), partition, last_partition())
+                part_tmp = GPTPartition(
+                    Sectors(data[partition]['size'], sector_size),
+                    data[partition]['filesystem'], data[partition].get(
+                        'format_command', None), data[partition].get(
+                            'mountopts', None), partition, last_partition())
                 part_tmp.pad_start += partition_gap
                 part_tmp.size -= partition_gap
                 setattr(self, partition, part_tmp)
@@ -100,8 +108,10 @@ class GPTPartitionMap(AbstractPartitionMap):
         volume = event.volume
         # Disk alignment still plays a role in virtualized environment,
         # but I honestly have no clue as to what best practice is here, so we choose 'none'
-        log_check_call(['parted', '--script', '--align', 'none', volume.device_path,
-                        '--', 'mklabel', 'gpt'])
+        log_check_call([
+            'parted', '--script', '--align', 'none', volume.device_path, '--',
+            'mklabel', 'gpt'
+        ])
         # Create the partitions
         for partition in self.partitions:
             partition.create(volume)

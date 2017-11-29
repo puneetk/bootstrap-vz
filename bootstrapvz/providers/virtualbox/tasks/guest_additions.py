@@ -14,9 +14,11 @@ class CheckGuestAdditionsPath(Task):
 
     @classmethod
     def run(cls, info):
-        guest_additions_path = rel_path(info.manifest.path, info.manifest.provider['guest_additions'])
+        guest_additions_path = rel_path(
+            info.manifest.path, info.manifest.provider['guest_additions'])
         if not os.path.exists(guest_additions_path):
-            msg = 'The file {file} does not exist.'.format(file=guest_additions_path)
+            msg = 'The file {file} does not exist.'.format(
+                file=guest_additions_path)
             raise TaskError(msg)
 
 
@@ -52,13 +54,17 @@ class InstallGuestAdditions(Task):
     @classmethod
     def run(cls, info):
         from bootstrapvz.common.tools import log_call, log_check_call
-        for line in log_check_call(['chroot', info.root, 'apt-cache', 'show', info.kernel['headers_pkg']]):
+        for line in log_check_call([
+                'chroot', info.root, 'apt-cache', 'show',
+                info.kernel['headers_pkg']
+        ]):
             key, value = line.split(':')
             if key.strip() == 'Depends':
                 kernel_version = value.strip().split('linux-headers-')[-1]
                 break
 
-        guest_additions_path = rel_path(info.manifest.path, info.manifest.provider['guest_additions'])
+        guest_additions_path = rel_path(
+            info.manifest.path, info.manifest.provider['guest_additions'])
         mount_dir = 'mnt/guest_additions'
         mount_path = os.path.join(info.root, mount_dir)
         os.mkdir(mount_path)

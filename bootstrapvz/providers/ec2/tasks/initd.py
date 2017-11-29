@@ -12,8 +12,10 @@ class AddEC2InitScripts(Task):
 
     @classmethod
     def run(cls, info):
-        init_scripts = {'ec2-get-credentials': 'ec2-get-credentials',
-                        'ec2-run-user-data': 'ec2-run-user-data'}
+        init_scripts = {
+            'ec2-get-credentials': 'ec2-get-credentials',
+            'ec2-run-user-data': 'ec2-run-user-data'
+        }
 
         init_scripts_dir = os.path.join(assets, 'init.d')
         for name, path in init_scripts.iteritems():

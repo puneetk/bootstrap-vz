@@ -15,4 +15,5 @@ class ConfigureGrub(Task):
         # Enable SCSI block multiqueue on Stretch.
         from bootstrapvz.common.releases import stretch
         if info.manifest.release >= stretch:
-            info.grub_config['GRUB_CMDLINE_LINUX'].append('scsi_mod.use_blk_mq=Y')
+            info.grub_config['GRUB_CMDLINE_LINUX'].append(
+                'scsi_mod.use_blk_mq=Y')

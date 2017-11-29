@@ -31,7 +31,11 @@ class CopyAmiToRegions(Task):
         for region in regions:
             conn = connect_to_region(region, **connect_args)
             region_conns[region] = conn
-            copied_image = conn.copy_image(source_region, source_ami, name=name, description=copy_description)
+            copied_image = conn.copy_image(
+                source_region,
+                source_ami,
+                name=name,
+                description=copy_description)
             region_amis[region] = copied_image.image_id
         info._ec2['region_amis'] = region_amis
         info._ec2['region_conns'] = region_conns
@@ -71,7 +75,8 @@ class PublishAmiManifest(Task):
             conn = connect_to_region(region)
             key = conn.get_bucket(bucket, validate=False).new_key(path)
             headers = {'Content-Type': 'application/json'}
-            key.set_contents_from_string(amis_json, headers=headers, policy='public-read')
+            key.set_contents_from_string(
+                amis_json, headers=headers, policy='public-read')
 
 
 class PublishAmi(Task):
@@ -90,7 +95,12 @@ class PublishAmi(Task):
             conn = region_conns[region]
             current_image = conn.get_image(region_ami)
             while current_image.state == 'pending':
-                logger.debug('Waiting for %s in %s (currently: %s)', region_ami, region, current_image.state)
+                logger.debug('Waiting for %s in %s (currently: %s)',
+                             region_ami, region, current_image.state)
                 time.sleep(5)
                 current_image = conn.get_image(region_ami)
-            conn.modify_image_attribute(region_ami, attribute='launchPermission', operation='add', groups='all')
+            conn.modify_image_attribute(
+                region_ami,
+                attribute='launchPermission',
+                operation='add',
+                groups='all')

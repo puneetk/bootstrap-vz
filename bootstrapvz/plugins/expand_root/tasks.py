@@ -37,12 +37,16 @@ class InstallExpandRootScripts(Task):
         expand_root_script = os.path.join(ASSETS_DIR, 'expand-root.sh')
         expand_root_service = os.path.join(ASSETS_DIR, 'expand-root.service')
 
-        expand_root_script_dest = os.path.join(info.root, 'usr/bin/expand-root.sh')
-        expand_root_service_dest = os.path.join(info.root, 'lib/systemd/system/expand-root.service')
+        expand_root_script_dest = os.path.join(info.root,
+                                               'usr/bin/expand-root.sh')
+        expand_root_service_dest = os.path.join(
+            info.root, 'lib/systemd/system/expand-root.service')
 
-        filesystem_type = info.manifest.plugins['expand_root'].get('filesystem_type')
+        filesystem_type = info.manifest.plugins['expand_root'].get(
+            'filesystem_type')
         root_device = info.manifest.plugins['expand_root'].get('root_device')
-        root_partition = info.manifest.plugins['expand_root'].get('root_partition')
+        root_partition = info.manifest.plugins['expand_root'].get(
+            'root_partition')
 
         # Copy files over
         shutil.copy(expand_root_script, expand_root_script_dest)
@@ -51,8 +55,11 @@ class InstallExpandRootScripts(Task):
 
         # Expand out options into expand-root.sh script.
         opts = '%s %s %s' % (root_device, root_partition, filesystem_type)
-        sed_i(expand_root_service_dest, r'^ExecStart=/usr/bin/expand-root.sh.*$',
+        sed_i(expand_root_service_dest,
+              r'^ExecStart=/usr/bin/expand-root.sh.*$',
               'ExecStart=/usr/bin/expand-root.sh %s' % opts)
 
         # Enable systemd service
-        log_check_call(['chroot', info.root,  'systemctl', 'enable', 'expand-root.service'])
+        log_check_call([
+            'chroot', info.root, 'systemctl', 'enable', 'expand-root.service'
+        ])

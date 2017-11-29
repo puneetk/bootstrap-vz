@@ -24,7 +24,10 @@ class InitializeBootstrapFilterList(Task):
 
     @classmethod
     def run(cls, info):
-        info._minimize_size['bootstrap_filter'] = {'exclude': [], 'include': []}
+        info._minimize_size['bootstrap_filter'] = {
+            'exclude': [],
+            'include': []
+        }
 
 
 class CreateBootstrapFilterScripts(Task):
@@ -42,11 +45,14 @@ class CreateBootstrapFilterScripts(Task):
                             'and is conflicting with this task')
 
         bootstrap_script = os.path.join(info.workspace, 'bootstrap_script.sh')
-        filter_script = os.path.join(info.workspace, 'bootstrap_files_filter.sh')
+        filter_script = os.path.join(info.workspace,
+                                     'bootstrap_files_filter.sh')
         excludes_file = os.path.join(info.workspace, 'debootstrap-excludes')
 
-        shutil.copy(os.path.join(assets, 'bootstrap-script.sh'), bootstrap_script)
-        shutil.copy(os.path.join(assets, 'bootstrap-files-filter.sh'), filter_script)
+        shutil.copy(
+            os.path.join(assets, 'bootstrap-script.sh'), bootstrap_script)
+        shutil.copy(
+            os.path.join(assets, 'bootstrap-files-filter.sh'), filter_script)
 
         sed_i(bootstrap_script, r'DEBOOTSTRAP_EXCLUDES_PATH', excludes_file)
         sed_i(bootstrap_script, r'BOOTSTRAP_FILES_FILTER_PATH', filter_script)
@@ -55,8 +61,10 @@ class CreateBootstrapFilterScripts(Task):
         # The pattern matching when excluding is needed in order to filter
         # everything below e.g. /usr/share/locale but not the folder itself
         filter_lists = info._minimize_size['bootstrap_filter']
-        exclude_list = '\|'.join(map(lambda p: '.' + p + '.\+', filter_lists['exclude']))
-        include_list = '\n'.join(map(lambda p: '.' + p, filter_lists['include']))
+        exclude_list = '\|'.join(
+            map(lambda p: '.' + p + '.\+', filter_lists['exclude']))
+        include_list = '\n'.join(
+            map(lambda p: '.' + p, filter_lists['include']))
         sed_i(filter_script, r'EXCLUDE_PATTERN', exclude_list)
         sed_i(filter_script, r'INCLUDE_PATHS', include_list)
         os.chmod(filter_script, 0755)
@@ -95,23 +103,30 @@ class FilterLocales(Task):
             '/usr/share/man/man7',
             '/usr/share/man/man8',
             '/usr/share/man/man9',
-        ] +
-            map(lambda l: '/usr/share/locale/' + l + '/', locales) +
-            map(lambda l: '/usr/share/man/' + l + '/', locales)
-        )
+        ] + map(lambda l: '/usr/share/locale/' + l + '/', locales) + map(
+            lambda l: '/usr/share/man/' + l + '/', locales))
 
         # Filter when installing things with dpkg
-        locale_lines = ['path-exclude=/usr/share/locale/*',
-                        'path-include=/usr/share/locale/locale.alias']
-        manpages_lines = ['path-exclude=/usr/share/man/*',
-                          'path-include=/usr/share/man/man[1-9]']
+        locale_lines = [
+            'path-exclude=/usr/share/locale/*',
+            'path-include=/usr/share/locale/locale.alias'
+        ]
+        manpages_lines = [
+            'path-exclude=/usr/share/man/*',
+            'path-include=/usr/share/man/man[1-9]'
+        ]
 
         locales = info.manifest.plugins['minimize_size']['dpkg']['locales']
-        locale_lines.extend(map(lambda l: 'path-include=/usr/share/locale/' + l + '/*', locales))
-        manpages_lines.extend(map(lambda l: 'path-include=/usr/share/man/' + l + '/*', locales))
+        locale_lines.extend(
+            map(lambda l: 'path-include=/usr/share/locale/' + l + '/*',
+                locales))
+        manpages_lines.extend(
+            map(lambda l: 'path-include=/usr/share/man/' + l + '/*', locales))
 
-        locales_path = os.path.join(info.root, 'etc/dpkg/dpkg.cfg.d/10filter-locales')
-        manpages_path = os.path.join(info.root, 'etc/dpkg/dpkg.cfg.d/10filter-manpages')
+        locales_path = os.path.join(info.root,
+                                    'etc/dpkg/dpkg.cfg.d/10filter-locales')
+        manpages_path = os.path.join(info.root,
+                                     'etc/dpkg/dpkg.cfg.d/10filter-manpages')
 
         with open(locales_path, 'w') as locale_filter:
             locale_filter.write('\n'.join(locale_lines) + '\n')
@@ -130,8 +145,10 @@ class ExcludeDocs(Task):
         # "Packages must not require the existence of any files in /usr/share/doc/ in order to function [...]."
         # Source: https://www.debian.org/doc/debian-policy/ch-docs.html
         # So doing this should cause no problems.
-        info._minimize_size['bootstrap_filter']['exclude'].append('/usr/share/doc/')
-        exclude_docs_path = os.path.join(info.root, 'etc/dpkg/dpkg.cfg.d/10exclude-docs')
+        info._minimize_size['bootstrap_filter']['exclude'].append(
+            '/usr/share/doc/')
+        exclude_docs_path = os.path.join(info.root,
+                                         'etc/dpkg/dpkg.cfg.d/10exclude-docs')
         with open(exclude_docs_path, 'w') as exclude_docs:
             exclude_docs.write('path-exclude=/usr/share/doc/*\n')
 

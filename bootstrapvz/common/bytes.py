@@ -7,18 +7,21 @@ def onlybytes(msg):
             if not isinstance(other, Bytes):
                 raise UnitError(msg)
             return func(self, other)
+
         return check_other
+
     return decorator
 
 
 class Bytes(object):
 
-    units = {'B': 1,
-             'KiB': 1024,
-             'MiB': 1024 * 1024,
-             'GiB': 1024 * 1024 * 1024,
-             'TiB': 1024 * 1024 * 1024 * 1024,
-             }
+    units = {
+        'B': 1,
+        'KiB': 1024,
+        'MiB': 1024 * 1024,
+        'GiB': 1024 * 1024 * 1024,
+        'TiB': 1024 * 1024 * 1024 * 1024,
+    }
 
     def __init__(self, qty):
         if isinstance(qty, (int, long)):
@@ -47,7 +50,8 @@ class Bytes(object):
         if unit not in Bytes.units:
             raise UnitError('Unrecognized unit: ' + unit)
         if self.qty % Bytes.units[unit] != 0:
-            msg = 'Unable to convert {qty} bytes to a whole number in {unit}'.format(qty=self.qty, unit=unit)
+            msg = 'Unable to convert {qty} bytes to a whole number in {unit}'.format(
+                qty=self.qty, unit=unit)
             raise UnitError(msg)
         return self.qty / Bytes.units[unit]
 
@@ -151,9 +155,10 @@ class Bytes(object):
         return self
 
     def __getstate__(self):
-        return {'__class__': self.__module__ + '.' + self.__class__.__name__,
-                'qty': self.qty,
-                }
+        return {
+            '__class__': self.__module__ + '.' + self.__class__.__name__,
+            'qty': self.qty,
+        }
 
     def __setstate__(self, state):
         self.qty = state['qty']

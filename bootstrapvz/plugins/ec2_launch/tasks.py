@@ -23,21 +23,26 @@ class LaunchEC2Instance(Task):
     @classmethod
     def run(cls, info):
         conn = info._ec2['connection']
-        r = conn.run_instances(ImageId=info._ec2['image']['ImageId'],
-                               MinCount=1,
-                               MaxCount=1,
-                               SecurityGroupIds=info.manifest.plugins['ec2_launch'].get('security_group_ids'),
-                               KeyName=info.manifest.plugins['ec2_launch'].get('ssh_key'),
-                               InstanceType=info.manifest.plugins['ec2_launch'].get('instance_type',
-                                                                                    'm3.medium'))
+        r = conn.run_instances(
+            ImageId=info._ec2['image']['ImageId'],
+            MinCount=1,
+            MaxCount=1,
+            SecurityGroupIds=info.manifest.plugins['ec2_launch'].get(
+                'security_group_ids'),
+            KeyName=info.manifest.plugins['ec2_launch'].get('ssh_key'),
+            InstanceType=info.manifest.plugins['ec2_launch'].get(
+                'instance_type', 'm3.medium'))
         info._ec2['instance'] = r['Instances'][0]
 
         if 'tags' in info.manifest.plugins['ec2_launch']:
             raw_tags = info.manifest.plugins['ec2_launch']['tags']
-            formatted_tags = {k: v.format(**info.manifest_vars) for k, v in raw_tags.items()}
+            formatted_tags = {
+                k: v.format(**info.manifest_vars)
+                for k, v in raw_tags.items()
+            }
             tags = [{'Key': k, 'Value': v} for k, v in formatted_tags.items()]
-            conn.create_tags(Resources=[info._ec2['instance']['InstanceId']],
-                             Tags=tags)
+            conn.create_tags(
+                Resources=[info._ec2['instance']['InstanceId']], Tags=tags)
 
 
 class PrintPublicIPAddress(Task):
@@ -56,10 +61,17 @@ class PrintPublicIPAddress(Task):
 
         try:
             waiter = conn.get_waiter('instance_status_ok')
-            waiter.wait(InstanceIds=[info._ec2['instance']['InstanceId']],
-                        Filters=[{'Name': 'instance-state-name', 'Values': ['running']}])
-            info._ec2['instance'] = conn.describe_instances(InstanceIds=[info._ec2['instance']['InstanceId']])['Reservations'][0]['Instances'][0]
-            logger.info('******* EC2 IP ADDRESS: %s *******' % info._ec2['instance']['PublicIpAddress'])
+            waiter.wait(
+                InstanceIds=[info._ec2['instance']['InstanceId']],
+                Filters=[{
+                    'Name': 'instance-state-name',
+                    'Values': ['running']
+                }])
+            info._ec2['instance'] = conn.describe_instances(
+                InstanceIds=[info._ec2['instance']['InstanceId']])[
+                    'Reservations'][0]['Instances'][0]
+            logger.info('******* EC2 IP ADDRESS: %s *******' %
+                        info._ec2['instance']['PublicIpAddress'])
             f.write(info._ec2['instance']['PublicIpAddress'])
         except Exception:
             logger.error('Could not get IP address for the instance')

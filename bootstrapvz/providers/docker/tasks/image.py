@@ -19,13 +19,17 @@ class CreateImage(Task):
     @classmethod
     def run(cls, info):
         from pipes import quote
-        tar_cmd = ['tar', '--create', '--numeric-owner',
-                   '--directory', info.volume.path, '.']
+        tar_cmd = [
+            'tar', '--create', '--numeric-owner', '--directory',
+            info.volume.path, '.'
+        ]
         docker_cmd = ['docker', 'import']
         for instruction in info._docker['dockerfile']:
             docker_cmd.extend(['--change', instruction])
-        docker_cmd.extend(['-', info.manifest.name.format(**info.manifest_vars)])
-        cmd = ' '.join(map(quote, tar_cmd)) + ' | ' + ' '.join(map(quote, docker_cmd))
+        docker_cmd.extend(
+            ['-', info.manifest.name.format(**info.manifest_vars)])
+        cmd = ' '.join(map(quote, tar_cmd)) + ' | ' + ' '.join(
+            map(quote, docker_cmd))
         [info._docker['image_id']] = log_check_call([cmd], shell=True)
 
 
@@ -45,14 +49,16 @@ class PopulateLabels(Task):
         # See here for the discussion on the debian-cloud mailing list
         # https://lists.debian.org/debian-cloud/2015/05/msg00071.html
         labels['architecture'] = info.manifest.system['architecture']
-        labels['build-date'] = pyrfc3339.generate(datetime.utcnow().replace(tzinfo=pytz.utc))
+        labels['build-date'] = pyrfc3339.generate(
+            datetime.utcnow().replace(tzinfo=pytz.utc))
         if 'labels' in info.manifest.provider:
             for label, value in info.manifest.provider['labels'].items():
                 labels[label] = value.format(**info.manifest_vars)
 
         from pipes import quote
         for label, value in labels.items():
-            info._docker['dockerfile'].append('LABEL {}={}'.format(label, quote(value)))
+            info._docker['dockerfile'].append('LABEL {}={}'.format(
+                label, quote(value)))
 
 
 class AppendManifestDockerfile(Task):

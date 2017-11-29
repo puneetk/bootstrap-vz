@@ -14,17 +14,18 @@ def resolve_tasks(taskset, manifest):
     taskset.discard(image.MoveImage)
     taskset.discard(ssh.DisableSSHPasswordAuthentication)
 
-    taskset.update([tasks.CheckBoxPath,
-                    tasks.CreateVagrantBoxDir,
-                    tasks.AddPackages,
-                    tasks.CreateVagrantUser,
-                    tasks.PasswordlessSudo,
-                    tasks.SetRootPassword,
-                    tasks.AddInsecurePublicKey,
-                    tasks.PackageBox,
-                    tasks.RemoveVagrantBoxDir,
-                    volume.Delete,
-                    ])
+    taskset.update([
+        tasks.CheckBoxPath,
+        tasks.CreateVagrantBoxDir,
+        tasks.AddPackages,
+        tasks.CreateVagrantUser,
+        tasks.PasswordlessSudo,
+        tasks.SetRootPassword,
+        tasks.AddInsecurePublicKey,
+        tasks.PackageBox,
+        tasks.RemoveVagrantBoxDir,
+        volume.Delete,
+    ])
 
 
 def resolve_rollback_tasks(taskset, manifest, completed, counter_task):

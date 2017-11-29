@@ -16,10 +16,13 @@ class CreateImageTarball(Task):
         filename = image_name + '.' + info.volume.extension
 
         tarball_name = image_name + '.tar.gz'
-        tarball_path = os.path.join(info.manifest.bootstrapper['workspace'], tarball_name)
+        tarball_path = os.path.join(info.manifest.bootstrapper['workspace'],
+                                    tarball_name)
         info._oracle['tarball_path'] = tarball_path
-        log_check_call(['tar', '--sparse', '-C', info.manifest.bootstrapper['workspace'],
-                        '-caf', tarball_path, filename])
+        log_check_call([
+            'tar', '--sparse', '-C', info.manifest.bootstrapper['workspace'],
+            '-caf', tarball_path, filename
+        ])
 
 
 class UploadImageTarball(Task):

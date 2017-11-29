@@ -13,13 +13,38 @@ class Volume(FSMProxy):
     __metaclass__ = ABCMeta
 
     # States this volume can be in
-    events = [{'name': 'create', 'src': 'nonexistent', 'dst': 'detached'},
-              {'name': 'attach', 'src': 'detached', 'dst': 'attached'},
-              {'name': 'link_dm_node', 'src': 'attached', 'dst': 'linked'},
-              {'name': 'unlink_dm_node', 'src': 'linked', 'dst': 'attached'},
-              {'name': 'detach', 'src': 'attached', 'dst': 'detached'},
-              {'name': 'delete', 'src': 'detached', 'dst': 'deleted'},
-              ]
+    events = [
+        {
+            'name': 'create',
+            'src': 'nonexistent',
+            'dst': 'detached'
+        },
+        {
+            'name': 'attach',
+            'src': 'detached',
+            'dst': 'attached'
+        },
+        {
+            'name': 'link_dm_node',
+            'src': 'attached',
+            'dst': 'linked'
+        },
+        {
+            'name': 'unlink_dm_node',
+            'src': 'linked',
+            'dst': 'attached'
+        },
+        {
+            'name': 'detach',
+            'src': 'attached',
+            'dst': 'detached'
+        },
+        {
+            'name': 'delete',
+            'src': 'detached',
+            'dst': 'deleted'
+        },
+    ]
 
     def __init__(self, partition_map):
         """
@@ -39,13 +64,18 @@ class Volume(FSMProxy):
             # Update that path whenever the path to the volume changes
             def set_dev_path(e):
                 self.partition_map.root.device_path = self.device_path
+
             callbacks['onafterattach'] = set_dev_path
             callbacks['onafterdetach'] = set_dev_path  # Will become None
             callbacks['onlink_dm_node'] = set_dev_path
             callbacks['onunlink_dm_node'] = set_dev_path
 
         # Create the configuration for our finite state machine
-        cfg = {'initial': 'nonexistent', 'events': self.events, 'callbacks': callbacks}
+        cfg = {
+            'initial': 'nonexistent',
+            'events': self.events,
+            'callbacks': callbacks
+        }
         super(Volume, self).__init__(cfg)
 
     def _after_create(self, e):
@@ -99,11 +129,12 @@ class Volume(FSMProxy):
 
         # This is the table we send to dmsetup, so that it may create a device mapping for us.
         table = ('{log_start_sec} {sectors} linear {major}:{minor} {start_sec}'
-                 .format(log_start_sec=logical_start_sector,
-                         sectors=sectors,
-                         major=device_partition['major'],
-                         minor=device_partition['minor'],
-                         start_sec=start_sector))
+                 .format(
+                     log_start_sec=logical_start_sector,
+                     sectors=sectors,
+                     major=device_partition['major'],
+                     minor=device_partition['minor'],
+                     start_sec=start_sector))
         import string
         import os.path
         # Figure out the device letter and path
@@ -116,7 +147,9 @@ class Volume(FSMProxy):
                 break
 
         if not hasattr(self, 'dm_node_name'):
-            raise VolumeError('Unable to find a free block device path for mounting the bootstrap volume')
+            raise VolumeError(
+                'Unable to find a free block device path for mounting the bootstrap volume'
+            )
 
         # Create the device mapping
         log_check_call(['dmsetup', 'create', self.dm_node_name], table)

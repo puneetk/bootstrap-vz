@@ -38,7 +38,7 @@ class CreatePVGrubCustomRule(Task):
 
         grubd = os.path.join(info.root, 'etc/grub.d')
         for cfg in [os.path.join(grubd, f) for f in os.listdir(grubd)]:
-            os.chmod(cfg, os.stat(cfg).st_mode & ~ x_all)
+            os.chmod(cfg, os.stat(cfg).st_mode & ~x_all)
 
         from shutil import copy
         script_src = os.path.join(assets, 'grub.d/40_custom')
@@ -57,7 +57,8 @@ class CreatePVGrubCustomRule(Task):
 
         if info.manifest.volume['backing'] == 's3':
             from bootstrapvz.common.tools import sed_i
-            sed_i(script_dst, '^GRUB_DEVICE=/dev/xvda$', 'GRUB_DEVICE=/dev/xvda1')
+            sed_i(script_dst, '^GRUB_DEVICE=/dev/xvda$',
+                  'GRUB_DEVICE=/dev/xvda1')
 
 
 class ConfigurePVGrub(Task):
@@ -80,5 +81,7 @@ class LinkGrubConfig(Task):
 
     @classmethod
     def run(cls, info):
-        log_check_call(['chroot', info.root,
-                        'ln', '--symbolic', '/boot/grub/grub.cfg', '/boot/grub/menu.lst'])
+        log_check_call([
+            'chroot', info.root, 'ln', '--symbolic', '/boot/grub/grub.cfg',
+            '/boot/grub/menu.lst'
+        ])

@@ -49,7 +49,8 @@ Options:
     """
     opts = docopt.docopt(usage)
     if opts['--color'] not in ('auto', 'always', 'never'):
-        raise docopt.DocoptExit('Value of --color must be one of auto, always or never.')
+        raise docopt.DocoptExit(
+            'Value of --color must be one of auto, always or never.')
     return opts
 
 
@@ -79,7 +80,8 @@ def setup_loggers(opts):
         # If --color=auto (default), decide whether to colorize by whether stderr is a tty.
         import os
         colorize = os.isatty(2)
-    console_handler = log.get_console_handler(debug=opts['--debug'], colorize=colorize)
+    console_handler = log.get_console_handler(
+        debug=opts['--debug'], colorize=colorize)
     root.addHandler(console_handler)
 
 
@@ -134,7 +136,8 @@ def run(manifest, debug=False, pause_on_error=False, dry_run=False):
 
         # Ask the provider and plugins for tasks they'd like to add to the rollback tasklist
         # Any additional arguments beyond the first two are passed directly to the provider and plugins
-        rollback_tasks = load_tasks('resolve_rollback_tasks', manifest, tasklist.tasks_completed, counter_task)
+        rollback_tasks = load_tasks('resolve_rollback_tasks', manifest,
+                                    tasklist.tasks_completed, counter_task)
         rollback_tasklist = TaskList(rollback_tasks)
 
         # Run the rollback tasklist

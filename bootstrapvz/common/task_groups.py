@@ -40,12 +40,13 @@ def get_standard_groups(manifest):
 
 
 def get_base_group(manifest):
-    group = [workspace.CreateWorkspace,
-             bootstrap.AddRequiredCommands,
-             host.CheckExternalCommands,
-             bootstrap.Bootstrap,
-             workspace.DeleteWorkspace,
-             ]
+    group = [
+        workspace.CreateWorkspace,
+        bootstrap.AddRequiredCommands,
+        host.CheckExternalCommands,
+        bootstrap.Bootstrap,
+        workspace.DeleteWorkspace,
+    ]
     if manifest.bootstrapper.get('tarball', False):
         group.append(bootstrap.MakeTarball)
     if manifest.bootstrapper.get('include_packages', False):
@@ -55,55 +56,59 @@ def get_base_group(manifest):
     return group
 
 
-volume_group = [volume.Attach,
-                volume.Detach,
-                filesystem.AddRequiredCommands,
-                filesystem.Format,
-                filesystem.FStab,
-                ]
+volume_group = [
+    volume.Attach,
+    volume.Detach,
+    filesystem.AddRequiredCommands,
+    filesystem.Format,
+    filesystem.FStab,
+]
 
-partitioning_group = [partitioning.AddRequiredCommands,
-                      partitioning.PartitionVolume,
-                      partitioning.MapPartitions,
-                      partitioning.UnmapPartitions,
-                      ]
+partitioning_group = [
+    partitioning.AddRequiredCommands,
+    partitioning.PartitionVolume,
+    partitioning.MapPartitions,
+    partitioning.UnmapPartitions,
+]
 
-boot_partition_group = [filesystem.CreateBootMountDir,
-                        filesystem.MountBoot,
-                        ]
+boot_partition_group = [
+    filesystem.CreateBootMountDir,
+    filesystem.MountBoot,
+]
 
-mounting_group = [filesystem.CreateMountDir,
-                  filesystem.MountRoot,
-                  filesystem.MountAdditional,
-                  filesystem.MountSpecials,
-                  filesystem.CopyMountTable,
-                  filesystem.RemoveMountTable,
-                  filesystem.UnmountRoot,
-                  filesystem.DeleteMountDir,
-                  ]
+mounting_group = [
+    filesystem.CreateMountDir,
+    filesystem.MountRoot,
+    filesystem.MountAdditional,
+    filesystem.MountSpecials,
+    filesystem.CopyMountTable,
+    filesystem.RemoveMountTable,
+    filesystem.UnmountRoot,
+    filesystem.DeleteMountDir,
+]
 
-kernel_group = [kernel.DetermineKernelVersion,
-                kernel.UpdateInitramfs,
-                ]
+kernel_group = [
+    kernel.DetermineKernelVersion,
+    kernel.UpdateInitramfs,
+]
 
-ssh_group = [ssh.AddOpenSSHPackage,
-             ssh.DisableSSHPasswordAuthentication,
-             ssh.DisableSSHDNSLookup,
-             ssh.AddSSHKeyGeneration,
-             initd.InstallInitScripts,
-             ssh.ShredHostkeys,
-             ]
+ssh_group = [
+    ssh.AddOpenSSHPackage,
+    ssh.DisableSSHPasswordAuthentication,
+    ssh.DisableSSHDNSLookup,
+    ssh.AddSSHKeyGeneration,
+    initd.InstallInitScripts,
+    ssh.ShredHostkeys,
+]
 
 
 def get_network_group(manifest):
-    if (
-       manifest.bootstrapper.get('variant', None) == 'minbase' and
-       'netbase' not in manifest.bootstrapper.get('include_packages', [])
-       ):
+    if (manifest.bootstrapper.get('variant', None) == 'minbase'
+            and 'netbase' not in manifest.bootstrapper.get(
+                'include_packages', [])):
         # minbase has no networking
         return []
-    group = [network.ConfigureNetworkIF,
-             network.RemoveDNSInfo]
+    group = [network.ConfigureNetworkIF, network.RemoveDNSInfo]
     if manifest.system.get('hostname', False):
         group.append(network.SetHostname)
     else:
@@ -112,16 +117,17 @@ def get_network_group(manifest):
 
 
 def get_apt_group(manifest):
-    group = [apt.AddDefaultSources,
-             apt.WriteSources,
-             apt.DisableDaemonAutostart,
-             apt.AptUpdate,
-             apt.AptUpgrade,
-             packages.InstallPackages,
-             apt.PurgeUnusedPackages,
-             apt.AptClean,
-             apt.EnableDaemonAutostart,
-             ]
+    group = [
+        apt.AddDefaultSources,
+        apt.WriteSources,
+        apt.DisableDaemonAutostart,
+        apt.AptUpdate,
+        apt.AptUpgrade,
+        packages.InstallPackages,
+        apt.PurgeUnusedPackages,
+        apt.AptClean,
+        apt.EnableDaemonAutostart,
+    ]
     if 'sources' in manifest.packages:
         group.append(apt.AddManifestSources)
     if 'trusted-keys' in manifest.packages:
@@ -161,13 +167,12 @@ def get_bootloader_group(manifest):
     from bootstrapvz.common.releases import stretch
     group = []
     if manifest.system['bootloader'] == 'grub':
-        group.extend([grub.AddGrubPackage,
-                      grub.InitGrubConfig,
-                      grub.SetGrubTerminalToConsole,
-                      grub.SetGrubConsolOutputDeviceToSerial,
-                      grub.RemoveGrubTimeout,
-                      grub.DisableGrubRecovery,
-                      grub.WriteGrubConfig])
+        group.extend([
+            grub.AddGrubPackage, grub.InitGrubConfig,
+            grub.SetGrubTerminalToConsole,
+            grub.SetGrubConsolOutputDeviceToSerial, grub.RemoveGrubTimeout,
+            grub.DisableGrubRecovery, grub.WriteGrubConfig
+        ])
         if manifest.release < jessie:
             group.append(grub.InstallGrub_1_99)
         else:
@@ -177,42 +182,48 @@ def get_bootloader_group(manifest):
     if manifest.system['bootloader'] == 'extlinux':
         group.append(extlinux.AddExtlinuxPackage)
         if manifest.release < jessie:
-            group.extend([extlinux.ConfigureExtlinux,
-                          extlinux.InstallExtlinux])
+            group.extend(
+                [extlinux.ConfigureExtlinux, extlinux.InstallExtlinux])
         else:
-            group.extend([extlinux.ConfigureExtlinuxJessie,
-                          extlinux.InstallExtlinuxJessie])
+            group.extend([
+                extlinux.ConfigureExtlinuxJessie,
+                extlinux.InstallExtlinuxJessie
+            ])
     return group
 
 
 def get_fs_specific_group(manifest):
     partitions = manifest.volume['partitions']
-    fs_specific_tasks = {'ext2': [filesystem.TuneVolumeFS],
-                         'ext3': [filesystem.TuneVolumeFS],
-                         'ext4': [filesystem.TuneVolumeFS],
-                         'xfs':  [filesystem.AddXFSProgs],
-                         }
+    fs_specific_tasks = {
+        'ext2': [filesystem.TuneVolumeFS],
+        'ext3': [filesystem.TuneVolumeFS],
+        'ext4': [filesystem.TuneVolumeFS],
+        'xfs': [filesystem.AddXFSProgs],
+    }
     group = set()
     if 'boot' in partitions:
-        group.update(fs_specific_tasks.get(partitions['boot']['filesystem'], []))
+        group.update(
+            fs_specific_tasks.get(partitions['boot']['filesystem'], []))
     if 'root' in partitions:
-        group.update(fs_specific_tasks.get(partitions['root']['filesystem'], []))
+        group.update(
+            fs_specific_tasks.get(partitions['root']['filesystem'], []))
     return list(group)
 
 
-cleanup_group = [cleanup.ClearMOTD,
-                 cleanup.CleanTMP,
-                 ]
+cleanup_group = [
+    cleanup.ClearMOTD,
+    cleanup.CleanTMP,
+]
 
-
-rollback_map = {workspace.CreateWorkspace:  workspace.DeleteWorkspace,
-                loopback.Create:            volume.Delete,
-                volume.Attach:              volume.Detach,
-                partitioning.MapPartitions: partitioning.UnmapPartitions,
-                filesystem.CreateMountDir:  filesystem.DeleteMountDir,
-                filesystem.MountRoot:       filesystem.UnmountRoot,
-                folder.Create:              folder.Delete,
-                }
+rollback_map = {
+    workspace.CreateWorkspace: workspace.DeleteWorkspace,
+    loopback.Create: volume.Delete,
+    volume.Attach: volume.Detach,
+    partitioning.MapPartitions: partitioning.UnmapPartitions,
+    filesystem.CreateMountDir: filesystem.DeleteMountDir,
+    filesystem.MountRoot: filesystem.UnmountRoot,
+    folder.Create: folder.Delete,
+}
 
 
 def get_standard_rollback_tasks(completed):

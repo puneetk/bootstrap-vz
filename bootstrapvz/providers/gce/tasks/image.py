@@ -19,14 +19,15 @@ class CreateTarball(Task):
         image_name = image_name.replace(".", "-")
         info._gce['image_name'] = image_name
         tarball_name = image_name + '.tar.gz'
-        tarball_path = os.path.join(info.manifest.bootstrapper['workspace'], tarball_name)
+        tarball_path = os.path.join(info.manifest.bootstrapper['workspace'],
+                                    tarball_name)
         info._gce['tarball_name'] = tarball_name
         info._gce['tarball_path'] = tarball_path
         # GCE requires that the file in the tar be named disk.raw, hence the transform
-        log_check_call(['tar', '--sparse', '-C', info.manifest.bootstrapper['workspace'],
-                        '-caf', tarball_path,
-                        '--transform=s|.*|disk.raw|',
-                        filename])
+        log_check_call([
+            'tar', '--sparse', '-C', info.manifest.bootstrapper['workspace'],
+            '-caf', tarball_path, '--transform=s|.*|disk.raw|', filename
+        ])
 
 
 class UploadImage(Task):
@@ -36,8 +37,11 @@ class UploadImage(Task):
 
     @classmethod
     def run(cls, info):
-        log_check_call(['gsutil', 'cp', info._gce['tarball_path'],
-                        info.manifest.provider['gcs_destination'] + info._gce['tarball_name']])
+        log_check_call([
+            'gsutil', 'cp', info._gce['tarball_path'],
+            info.manifest.provider['gcs_destination'] +
+            info._gce['tarball_name']
+        ])
 
 
 class RegisterImage(Task):
@@ -51,7 +55,10 @@ class RegisterImage(Task):
         if 'description' in info.manifest.provider:
             image_description = info.manifest.provider['description']
             image_description = image_description.format(**info.manifest_vars)
-        log_check_call(['gcloud', 'compute', '--project=' + info.manifest.provider['gce_project'],
-                        'images', 'create', info._gce['image_name'],
-                        '--source-uri=' + info.manifest.provider['gcs_destination'] + info._gce['tarball_name'],
-                        '--description=' + image_description])
+        log_check_call([
+            'gcloud', 'compute',
+            '--project=' + info.manifest.provider['gce_project'], 'images',
+            'create', info._gce['image_name'],
+            '--source-uri=' + info.manifest.provider['gcs_destination'] +
+            info._gce['tarball_name'], '--description=' + image_description
+        ])

@@ -26,17 +26,20 @@ class AddSSHKeyGeneration(Task):
         install = info.initd['install']
         from subprocess import CalledProcessError
         try:
-            log_check_call(['chroot', info.root,
-                            'dpkg-query', '-W', 'openssh-server'])
+            log_check_call(
+                ['chroot', info.root, 'dpkg-query', '-W', 'openssh-server'])
             from bootstrapvz.common.releases import squeeze
             if info.manifest.release == squeeze:
-                install['generate-ssh-hostkeys'] = os.path.join(init_scripts_dir, 'squeeze/generate-ssh-hostkeys')
+                install['generate-ssh-hostkeys'] = os.path.join(
+                    init_scripts_dir, 'squeeze/generate-ssh-hostkeys')
             else:
-                install['generate-ssh-hostkeys'] = os.path.join(init_scripts_dir, 'generate-ssh-hostkeys')
+                install['generate-ssh-hostkeys'] = os.path.join(
+                    init_scripts_dir, 'generate-ssh-hostkeys')
         except CalledProcessError:
             import logging
-            logging.getLogger(__name__).warn('The OpenSSH server has not been installed, '
-                                             'not installing SSH host key generation script.')
+            logging.getLogger(__name__).warn(
+                'The OpenSSH server has not been installed, '
+                'not installing SSH host key generation script.')
 
 
 class DisableSSHPasswordAuthentication(Task):
@@ -47,7 +50,8 @@ class DisableSSHPasswordAuthentication(Task):
     def run(cls, info):
         from ..tools import sed_i
         sshd_config_path = os.path.join(info.root, 'etc/ssh/sshd_config')
-        sed_i(sshd_config_path, '^#PasswordAuthentication yes', 'PasswordAuthentication no')
+        sed_i(sshd_config_path, '^#PasswordAuthentication yes',
+              'PasswordAuthentication no')
 
 
 class EnableRootLogin(Task):
@@ -59,11 +63,13 @@ class EnableRootLogin(Task):
         sshdconfig_path = os.path.join(info.root, 'etc/ssh/sshd_config')
         if os.path.exists(sshdconfig_path):
             from bootstrapvz.common.tools import sed_i
-            sed_i(sshdconfig_path, '^#?PermitRootLogin .*', 'PermitRootLogin yes')
+            sed_i(sshdconfig_path, '^#?PermitRootLogin .*',
+                  'PermitRootLogin yes')
         else:
             import logging
-            logging.getLogger(__name__).warn('The OpenSSH server has not been installed, '
-                                             'not enabling SSH root login.')
+            logging.getLogger(__name__).warn(
+                'The OpenSSH server has not been installed, '
+                'not enabling SSH root login.')
 
 
 class DisableRootLogin(Task):
@@ -75,11 +81,13 @@ class DisableRootLogin(Task):
         sshdconfig_path = os.path.join(info.root, 'etc/ssh/sshd_config')
         if os.path.exists(sshdconfig_path):
             from bootstrapvz.common.tools import sed_i
-            sed_i(sshdconfig_path, '^#?PermitRootLogin .*', 'PermitRootLogin no')
+            sed_i(sshdconfig_path, '^#?PermitRootLogin .*',
+                  'PermitRootLogin no')
         else:
             import logging
-            logging.getLogger(__name__).warn('The OpenSSH server has not been installed, '
-                                             'not disabling SSH root login.')
+            logging.getLogger(__name__).warn(
+                'The OpenSSH server has not been installed, '
+                'not disabling SSH root login.')
 
 
 class DisableSSHDNSLookup(Task):
@@ -99,16 +107,18 @@ class ShredHostkeys(Task):
 
     @classmethod
     def run(cls, info):
-        ssh_hostkeys = ['ssh_host_dsa_key',
-                        'ssh_host_rsa_key']
+        ssh_hostkeys = ['ssh_host_dsa_key', 'ssh_host_rsa_key']
 
         from bootstrapvz.common.releases import wheezy
         if info.manifest.release >= wheezy:
             ssh_hostkeys.append('ssh_host_ecdsa_key')
 
-        private = [os.path.join(info.root, 'etc/ssh', name) for name in ssh_hostkeys]
+        private = [
+            os.path.join(info.root, 'etc/ssh', name) for name in ssh_hostkeys
+        ]
         public = [path + '.pub' for path in private]
 
         from ..tools import log_check_call
-        log_check_call(['shred', '--remove'] + [key for key in private + public
-                                                if os.path.isfile(key)])
+        log_check_call(
+            ['shred', '--remove'] +
+            [key for key in private + public if os.path.isfile(key)])

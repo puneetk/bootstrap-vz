@@ -11,5 +11,6 @@ def resolve_tasks(taskset, manifest):
     if manifest.plugins['google_cloud_repo'].get('enable_keyring_repo', False):
         taskset.add(tasks.AddGoogleCloudRepoKeyringRepo)
         taskset.add(tasks.InstallGoogleCloudRepoKeyringPackage)
-        if manifest.plugins['google_cloud_repo'].get('cleanup_bootstrap_key', False):
+        if manifest.plugins['google_cloud_repo'].get('cleanup_bootstrap_key',
+                                                     False):
             taskset.add(tasks.CleanupBootstrapRepoKey)

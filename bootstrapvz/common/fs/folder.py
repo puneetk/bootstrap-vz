@@ -4,9 +4,18 @@ from bootstrapvz.base.fs.volume import Volume
 class Folder(Volume):
 
     # Override the states this volume can be in (i.e. we can't "format" or "attach" it)
-    events = [{'name': 'create', 'src': 'nonexistent', 'dst': 'attached'},
-              {'name': 'delete', 'src': 'attached', 'dst': 'deleted'},
-              ]
+    events = [
+        {
+            'name': 'create',
+            'src': 'nonexistent',
+            'dst': 'attached'
+        },
+        {
+            'name': 'delete',
+            'src': 'attached',
+            'dst': 'deleted'
+        },
+    ]
 
     extension = 'chroot'
 

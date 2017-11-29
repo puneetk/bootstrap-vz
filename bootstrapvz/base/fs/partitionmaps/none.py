@@ -16,8 +16,10 @@ class NoPartitions(object):
         from bootstrapvz.common.sectors import Sectors
 
         # In the NoPartitions partitions map we only have a single 'partition'
-        self.root = SinglePartition(Sectors(data['root']['size'], sector_size),
-                                    data['root']['filesystem'], data['root'].get('format_command', None), data['root'].get('mount_opts', None))
+        self.root = SinglePartition(
+            Sectors(data['root']['size'], sector_size),
+            data['root']['filesystem'], data['root'].get(
+                'format_command', None), data['root'].get('mount_opts', None))
         self.partitions = [self.root]
 
     def is_blocking(self):

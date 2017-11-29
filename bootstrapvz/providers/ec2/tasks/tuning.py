@@ -23,7 +23,7 @@ class BlackListModules(Task):
 
     @classmethod
     def run(cls, info):
-        blacklist_path = os.path.join(info.root, 'etc/modprobe.d/blacklist.conf')
+        blacklist_path = os.path.join(info.root,
+                                      'etc/modprobe.d/blacklist.conf')
         with open(blacklist_path, 'a') as blacklist:
-            blacklist.write(('blacklist i2c_piix4\n'
-                             'blacklist psmouse\n'))
+            blacklist.write(('blacklist i2c_piix4\n' 'blacklist psmouse\n'))

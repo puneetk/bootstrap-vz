@@ -205,14 +205,17 @@ class WriteGrubConfig(Task):
             elif isinstance(value, int):
                 grub_config_contents += '{}={}\n'.format(key, value)
             elif isinstance(value, bool):
-                grub_config_contents += '{}="{}"\n'.format(key, str(value).lower())
+                grub_config_contents += '{}="{}"\n'.format(
+                    key,
+                    str(value).lower())
             elif isinstance(value, list):
                 if len(value) > 0:
                     args_list = ' '.join(map(str, value))
                     grub_config_contents += '{}="{}"\n'.format(key, args_list)
             elif value is not None:
                 raise TaskError('Don\'t know how to handle type {}, '
-                                'when creating grub config'.format(type(value)))
+                                'when creating grub config'.format(
+                                    type(value)))
         grub_defaults = os.path.join(info.root, 'etc/default/grub')
         with open(grub_defaults, 'w') as grub_defaults_handle:
             grub_defaults_handle.write(grub_config_contents)
@@ -302,19 +305,23 @@ class InstallGrub_1_99(Task):
             if isinstance(p_map, partitionmaps.none.NoPartitions):
                 p_map.root.device_path = info.volume.device_path
         try:
-            [device_path] = log_check_call(['readlink', '-f', info.volume.device_path])
+            [device_path] = log_check_call(
+                ['readlink', '-f', info.volume.device_path])
             device_map_path = os.path.join(info.root, 'boot/grub/device.map')
             partition_prefix = 'msdos'
             if isinstance(p_map, partitionmaps.gpt.GPTPartitionMap):
                 partition_prefix = 'gpt'
             with open(device_map_path, 'w') as device_map:
-                device_map.write('(hd0) {device_path}\n'.format(device_path=device_path))
+                device_map.write(
+                    '(hd0) {device_path}\n'.format(device_path=device_path))
                 if not isinstance(p_map, partitionmaps.none.NoPartitions):
-                    for idx, partition in enumerate(info.volume.partition_map.partitions):
+                    for idx, partition in enumerate(
+                            info.volume.partition_map.partitions):
                         device_map.write('(hd0,{prefix}{idx}) {device_path}\n'
-                                         .format(device_path=partition.device_path,
-                                                 prefix=partition_prefix,
-                                                 idx=idx + 1))
+                                         .format(
+                                             device_path=partition.device_path,
+                                             prefix=partition_prefix,
+                                             idx=idx + 1))
 
             # Install grub
             log_check_call(['chroot', info.root, 'grub-install', device_path])
@@ -335,5 +342,6 @@ class InstallGrub_2(Task):
 
     @classmethod
     def run(cls, info):
-        log_check_call(['chroot', info.root, 'grub-install', info.volume.device_path])
+        log_check_call(
+            ['chroot', info.root, 'grub-install', info.volume.device_path])
         log_check_call(['chroot', info.root, 'update-grub'])

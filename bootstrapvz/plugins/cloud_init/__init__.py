@@ -23,9 +23,10 @@ def resolve_tasks(taskset, manifest):
     if manifest.release >= jessie:
         taskset.add(tasks.SetCloudInitMountOptions)
 
-    taskset.update([tasks.SetMetadataSource,
-                    tasks.AddCloudInitPackages,
-                    ])
+    taskset.update([
+        tasks.SetMetadataSource,
+        tasks.AddCloudInitPackages,
+    ])
 
     options = manifest.plugins['cloud_init']
     if 'username' in options:

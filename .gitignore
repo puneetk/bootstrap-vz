@@ -1,6 +1,7 @@
 *.pyc
 *.pyo
 __pycache__/
+*.log
 
 # Jekyll-generated files
 /Gemfile.lock

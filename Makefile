@@ -21,7 +21,6 @@ all: clean lint unit_tests integration_tests format_with_yapf
 
 clean:
 	-rm -r $(PYC_FILES) $(TEST_PYC_FILES)
-	-rm -r .cache .coverage .coverage.* htmlcov
 	-rm $(shell find . -name '*.log')
 	-rm -r .tox_output
 	-rm -r .tox

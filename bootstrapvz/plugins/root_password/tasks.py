@@ -1,8 +1,18 @@
+# -*- coding: utf-8 -*-
+"""
+bootstrapvz.plugins.root_password.tasks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+"""
+
 from bootstrapvz.base import Task
 from bootstrapvz.common import phases
 
 
 class SetRootPassword(Task):
+    """ SetRootPassword """
+
     description = 'Setting the root password'
     phase = phases.system_modification
 

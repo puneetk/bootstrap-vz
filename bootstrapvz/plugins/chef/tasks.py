@@ -1,9 +1,20 @@
+# -*- coding: utf-8 -*-
+"""
+bootstrapvz.plugins.chef.tasks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+"""
+
+import os
+
 from bootstrapvz.base import Task
 from bootstrapvz.common import phases
-import os
 
 
 class CheckAssetsPath(Task):
+    """ Check Assets Path
+    Checking whether the assets path exist """
     description = 'Checking whether the assets path exist'
     phase = phases.validation
 
@@ -22,6 +33,8 @@ class CheckAssetsPath(Task):
 
 
 class AddPackages(Task):
+    """ Add Packages
+    Add chef package """
     description = 'Add chef package'
     phase = phases.preparation
 
@@ -31,6 +44,8 @@ class AddPackages(Task):
 
 
 class CopyChefAssets(Task):
+    """ Copy Chef Assets
+    Copying chef assets """
     description = 'Copying chef assets'
     phase = phases.system_modification
 

@@ -1,14 +1,30 @@
+# -*- coding: utf-8 -*-
+"""
+bootstrapvz.vagrant.tasks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+"""
+
+#pylint: disable=unused-argument,protected-access,too-many-locals
+
+import os
+import shutil
+import logging
+
 from bootstrapvz.base import Task
 from bootstrapvz.common import phases
 from bootstrapvz.common.tasks import workspace
 from bootstrapvz.common.tools import rel_path
-import os
-import shutil
+
+_LOGGER = logging.getLogger(__name__)
 
 assets = rel_path(__file__, 'assets')
 
 
 class CheckBoxPath(Task):
+    """ CheckBoxPath
+    Checking if the vagrant box file already exists """
     description = 'Checking if the vagrant box file already exists'
     phase = phases.validation
 
@@ -28,6 +44,8 @@ class CheckBoxPath(Task):
 
 
 class CreateVagrantBoxDir(Task):
+    """ Create Vagrant Box Dir
+    Creating directory for the vagrant box """
     description = 'Creating directory for the vagrant box'
     phase = phases.preparation
     predecessors = [workspace.CreateWorkspace]
@@ -39,6 +57,8 @@ class CreateVagrantBoxDir(Task):
 
 
 class AddPackages(Task):
+    """ Add Packages
+    Add packages that vagrant depends on """
     description = 'Add packages that vagrant depends on'
     phase = phases.preparation
 
@@ -50,6 +70,8 @@ class AddPackages(Task):
 
 
 class CreateVagrantUser(Task):
+    """ CreateVagrantUser
+    Create vagrant user """
     description = 'Creating the vagrant user'
     phase = phases.system_modification
 
@@ -63,6 +85,8 @@ class CreateVagrantUser(Task):
 
 
 class PasswordlessSudo(Task):
+    """  PasswordlessSudo
+    Allowing the vagrant user to use sudo without a password """
     description = 'Allowing the vagrant user to use sudo without a password'
     phase = phases.system_modification
 
@@ -77,6 +101,8 @@ class PasswordlessSudo(Task):
 
 
 class AddInsecurePublicKey(Task):
+    """ AddInsecurePublicKey
+    Adding vagrant insecure public key """
     description = 'Adding vagrant insecure public key'
     phase = phases.system_modification
     predecessors = [CreateVagrantUser]
@@ -107,6 +133,8 @@ class AddInsecurePublicKey(Task):
 
 
 class SetRootPassword(Task):
+    """ Set Root Password
+    Setting the root password to vagrant """
     description = 'Setting the root password to `vagrant\''
     phase = phases.system_modification
 
@@ -117,6 +145,8 @@ class SetRootPassword(Task):
 
 
 class PackageBox(Task):
+    """ Package Box
+    Packaging the volume as a vagrant box """
     description = 'Packaging the volume as a vagrant box'
     phase = phases.image_registration
 
@@ -148,8 +178,7 @@ class PackageBox(Task):
             'tar', '--create', '--gzip', '--dereference', '--file',
             info._vagrant['box_path'], '--directory', info._vagrant['folder']
         ] + box_files)
-        import logging
-        logging.getLogger(__name__).info(
+        _LOGGER.info(
             'The vagrant box has been placed at ' + info._vagrant['box_path'])
 
     @classmethod
@@ -230,8 +259,7 @@ class PackageBox(Task):
         from datetime import datetime
         attr(machine, 'ovf:lastStateChange',
              datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'))
-        [nic] = machine.findall('./ovf:Hardware/ovf:Network/ovf:Adapter',
-                                namespaces)
+        machine.findall('./ovf:Hardware/ovf:Network/ovf:Adapter', namespaces)
         attr(machine, 'ovf:MACAddress', mac_address)
 
         [device_img] = machine.findall(
@@ -246,6 +274,8 @@ class PackageBox(Task):
 
 
 class RemoveVagrantBoxDir(Task):
+    """ Remove VagrantBox Dir
+    Removing the vagrant box directory """
     description = 'Removing the vagrant box directory'
     phase = phases.cleaning
     successors = [workspace.DeleteWorkspace]

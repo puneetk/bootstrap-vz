@@ -1,12 +1,24 @@
+# -*- coding: utf-8 -*-
+"""
+bootstrapvz.plugins.ec2_launch.tasks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+"""
+#pylint: disable=protected-access
+
+import time
 import logging
+
 from bootstrapvz.base import Task
 from bootstrapvz.common import phases
 from bootstrapvz.providers.ec2.tasks import ami
 
+_LOGGER = logging.getLogger(__name__)
+
 
 # TODO: Merge with the method available in wip-integration-tests branch
 def waituntil(predicate, timeout=5, interval=0.05):
-    import time
     threshhold = time.time() + timeout
     while time.time() < threshhold:
         if predicate():
@@ -16,6 +28,7 @@ def waituntil(predicate, timeout=5, interval=0.05):
 
 
 class LaunchEC2Instance(Task):
+    """ Launch EC2 Instance """
     description = 'Launching EC2 instance'
     phase = phases.image_registration
     predecessors = [ami.RegisterAMI]
@@ -46,6 +59,7 @@ class LaunchEC2Instance(Task):
 
 
 class PrintPublicIPAddress(Task):
+    """ Print Public IP Address """
     description = 'Waiting for the instance to launch'
     phase = phases.image_registration
     predecessors = [LaunchEC2Instance]
@@ -53,7 +67,6 @@ class PrintPublicIPAddress(Task):
     @classmethod
     def run(cls, info):
         conn = info._ec2['connection']
-        logger = logging.getLogger(__name__)
         filename = info.manifest.plugins['ec2_launch']['print_public_ip']
         if not filename:
             filename = '/dev/null'
@@ -70,17 +83,17 @@ class PrintPublicIPAddress(Task):
             info._ec2['instance'] = conn.describe_instances(
                 InstanceIds=[info._ec2['instance']['InstanceId']])[
                     'Reservations'][0]['Instances'][0]
-            logger.info('******* EC2 IP ADDRESS: %s *******' %
-                        info._ec2['instance']['PublicIpAddress'])
+            _LOGGER.info('******* EC2 IP ADDRESS: %s *******', info._ec2['instance']['PublicIpAddress'])
             f.write(info._ec2['instance']['PublicIpAddress'])
         except Exception:
-            logger.error('Could not get IP address for the instance')
+            _LOGGER.error('Could not get IP address for the instance')
             f.write('')
 
         f.close()
 
 
 class DeregisterAMI(Task):
+    """ Deregister AMI """
     description = 'Deregistering AMI'
     phase = phases.image_registration
     predecessors = [LaunchEC2Instance]
@@ -88,7 +101,6 @@ class DeregisterAMI(Task):
     @classmethod
     def run(cls, info):
         ec2 = info._ec2
-        logger = logging.getLogger(__name__)
 
         def instance_running():
             ec2['instance'].update()
@@ -98,4 +110,4 @@ class DeregisterAMI(Task):
             info._ec2['connection'].deregister_image(info._ec2['image'])
             info._ec2['snapshot'].delete()
         else:
-            logger.error('Timeout while booting instance')
+            _LOGGER.error('Timeout while booting instance')

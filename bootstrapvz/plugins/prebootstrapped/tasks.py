@@ -1,3 +1,16 @@
+# -*- coding: utf-8 -*-
+"""
+bootstrapvz.plugins.prebootstrapped.tasks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+"""
+#pylint: disable=unused-argument
+
+import os.path
+import time
+import logging
+
 from bootstrapvz.base import Task
 from bootstrapvz.common import phases
 from bootstrapvz.common.tasks import volume
@@ -7,9 +20,7 @@ from bootstrapvz.providers.ec2.tasks import ebs
 from bootstrapvz.common.fs import unmounted
 from bootstrapvz.common.tools import log_check_call
 from shutil import copyfile
-import os.path
-import time
-import logging
+
 log = logging.getLogger(__name__)
 
 
@@ -26,7 +37,7 @@ class Snapshot(Task):
         with unmounted(info.volume):
             snapshot = info.volume.snapshot()
         msg = 'A snapshot of the bootstrapped volume was created. ID: ' + snapshot.id
-        log.info(msg)
+        _LOGGER.info(msg)
 
 
 class CreateFromSnapshot(Task):
@@ -66,7 +77,7 @@ class CopyImage(Task):
         with unmounted(info.volume):
             copyfile(info.volume.image_path, destination)
         msg = 'A copy of the bootstrapped volume was created. Path: ' + destination
-        log.info(msg)
+        _LOGGER.info(msg)
 
 
 class CreateFromImage(Task):
@@ -100,7 +111,7 @@ class CopyFolder(Task):
                                    folder_backup_name)
         log_check_call(['cp', '-a', info.volume.path, destination])
         msg = 'A copy of the bootstrapped volume was created. Path: ' + destination
-        log.info(msg)
+        _LOGGER.info(msg)
 
 
 class CreateFromFolder(Task):

@@ -1,14 +1,25 @@
+# -*- coding: utf-8 -*-
+"""
+bootstrapvz.admin_user.tasks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+"""
+#pylint: disable=unused-argument
+
+import os
+import logging
+
 from bootstrapvz.base import Task
 from bootstrapvz.common import phases
 from bootstrapvz.common.tasks.initd import InstallInitScripts
 from bootstrapvz.providers.ec2.tasks.initd import AddEC2InitScripts
 
-import os
-import logging
-log = logging.getLogger(__name__)
+_LOGGER = logging.getLogger(__name__)
 
 
 class CheckPublicKeyFile(Task):
+    """ Check PublicKey File """
     description = 'Check that the public key is a valid file'
     phase = phases.validation
 
@@ -24,7 +35,7 @@ class CheckPublicKeyFile(Task):
                 info.manifest.validation_error(
                     msg, ['plugins', 'admin_user', 'pubkey'])
 
-            ret, _, stderr = log_call(['ssh-keygen', '-l', '-f', abs_pubkey])
+            ret, _, _= log_call(['ssh-keygen', '-l', '-f', abs_pubkey])
             if ret != 0:
                 msg = 'Invalid public key file at %s' % pubkey
                 info.manifest.validation_error(
@@ -32,6 +43,8 @@ class CheckPublicKeyFile(Task):
 
 
 class AddSudoPackage(Task):
+    """ Add Sudo Package
+        Adding 'sudo' to the image packages """
     description = 'Adding `sudo\' to the image packages'
     phase = phases.preparation
 
@@ -41,6 +54,8 @@ class AddSudoPackage(Task):
 
 
 class CreateAdminUser(Task):
+    """ Create Admin User
+        Creating the admin user """
     description = 'Creating the admin user'
     phase = phases.system_modification
 
@@ -54,6 +69,8 @@ class CreateAdminUser(Task):
 
 
 class PasswordlessSudo(Task):
+    """ Passwordless Sudo
+        Allowing the admin user to use sudo without a password """
     description = 'Allowing the admin user to use sudo without a password'
     phase = phases.system_modification
 
@@ -70,6 +87,8 @@ class PasswordlessSudo(Task):
 
 
 class AdminUserPassword(Task):
+    """ Admin User Password
+        Setting the admin user password """
     description = 'Setting the admin user password'
     phase = phases.system_modification
     predecessors = [InstallInitScripts, CreateAdminUser]
@@ -83,6 +102,8 @@ class AdminUserPassword(Task):
 
 
 class AdminUserPublicKey(Task):
+    """ Admin User PublicKey
+        Installing the public key for the admin user """
     description = 'Installing the public key for the admin user'
     phase = phases.system_modification
     predecessors = [AddEC2InitScripts, CreateAdminUser]
@@ -91,7 +112,7 @@ class AdminUserPublicKey(Task):
     @classmethod
     def run(cls, info):
         if 'ec2-get-credentials' in info.initd['install']:
-            log.warn(
+            _LOGGER.warn(
                 'You are using a static public key for the admin account.'
                 'This will conflict with the ec2 public key injection mechanism.'
                 'The ec2-get-credentials startup script will therefore not be enabled.'
@@ -135,6 +156,8 @@ class AdminUserPublicKey(Task):
 
 
 class AdminUserPublicKeyEC2(Task):
+    """ Admin User PublicKey EC2
+        Modifying ec2-get-credentials to copy the ssh public key to the admin user """
     description = 'Modifying ec2-get-credentials to copy the ssh public key to the admin user'
     phase = phases.system_modification
     predecessors = [InstallInitScripts, CreateAdminUser]

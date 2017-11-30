@@ -80,6 +80,7 @@ class AddDefaultSources(Task):
             info.source_lists.add(
                 'main',
                 'deb     {apt_mirror} {system.release}-updates ' + components)
+
             if include_src:
                 info.source_lists.add(
                     'main', 'deb-src {apt_mirror} {system.release}-updates ' +

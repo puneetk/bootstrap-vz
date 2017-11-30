@@ -33,11 +33,15 @@ class BootstrapInformation(object):
         self.apt_mirror = self.manifest.packages.get(
             'mirror', 'http://deb.debian.org/debian/')
 
+        # The default apt security mirror
+        self.apt_security = self.manifest.packages.get('security', 'http://security.debian.org/')
+
         # Create the manifest_vars dictionary
         self.manifest_vars = self.__create_manifest_vars(
             self.manifest, {
                 'apt_mirror': self.apt_mirror
             })
+
 
         # Keep a list of apt sources,
         # so that tasks may add to that list without having to fiddle with apt source list files.
